@@ -51,15 +51,17 @@ class _MyAppState extends State<MyApp> {
               maintainState: false,
               visible: androidCanvasVisible,
               child: AndroidView(
-                viewType: 'custom_canvas_view',
+                viewType: 'accelerated_canvas_view',
                 creationParams: {
                   'color': Colors.black.value,
                   'width': 10,
                 },
                 creationParamsCodec: const StandardMessageCodec(),
                 onPlatformViewCreated: (int id) {
-                  print("Trying to create Platform Channel");
-                  androidViewChannel = MethodChannel('custom_canvas_view_$id');
+                  print("Accelerated canvas platform view created with id: $id");
+                  // Note: Method channel communication can be added here if needed
+                  // for stroke data communication between native and Flutter
+                  androidViewChannel = MethodChannel('accelerated_canvas_view_$id');
                   androidViewChannel?.setMethodCallHandler(_handleMethodCall);
                 },
               ),

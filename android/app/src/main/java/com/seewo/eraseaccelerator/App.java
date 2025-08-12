@@ -48,18 +48,44 @@ public class App {
     public static App getInstance() {
         return sInstance;
     }
+    
+    /**
+     * Ensure App is initialized with context - can be called multiple times safely
+     */
+    public static void ensureInitialized(Context context) {
+        Log.d(TAG, "ensureInitialized() called with context: " + context);
+        App instance = getInstance();
+        if (instance.mContext == null && context != null) {
+            Log.d(TAG, "App not initialized, calling init()");
+            instance.init(context);
+        } else {
+            Log.d(TAG, "App already initialized or context is null (current context: " + instance.mContext + ")");
+        }
+    }
 
     public void init(Context context) {
+        Log.d(TAG, "App.init() called with context: " + context);
         mContext = context;
-        BoardTypeUtil.init();
-        DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
-        mScreenWidth = metrics.widthPixels;
-        mScreenHeight = metrics.heightPixels;
-        mScreenRect = new Rect(0, 0, mScreenWidth, mScreenHeight);
+        Log.d(TAG, "mContext set to: " + mContext);
+        
+        try {
+            BoardTypeUtil.init();
+            Log.d(TAG, "BoardTypeUtil.init() completed");
+            
+            DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+            mScreenWidth = metrics.widthPixels;
+            mScreenHeight = metrics.heightPixels;
+            mScreenRect = new Rect(0, 0, mScreenWidth, mScreenHeight);
+            Log.d(TAG, "Screen metrics: " + mScreenWidth + "x" + mScreenHeight);
 
-        mNoteWidth = mScreenWidth;
-        mNoteHeight = mScreenHeight;
-        mVisibleRect = new Rect(0, 0, mScreenWidth, mScreenHeight);
+            mNoteWidth = mScreenWidth;
+            mNoteHeight = mScreenHeight;
+            mVisibleRect = new Rect(0, 0, mScreenWidth, mScreenHeight);
+            
+            Log.d(TAG, "App.init() completed successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Error in App.init()", e);
+        }
     }
 
     public int getScreenWidth() {
@@ -91,7 +117,19 @@ public class App {
 
 
     public boolean isUseAllMotionTouch() {
-        return mContext.getResources().getBoolean(R.bool.is_use_all_motion_touch);
+        Log.d(TAG, "isUseAllMotionTouch() called, mContext = " + mContext);
+        if (mContext == null) {
+            Log.e(TAG, "isUseAllMotionTouch(): mContext is null! Returning default value");
+            return true; // Default fallback value
+        }
+        try {
+            boolean result = mContext.getResources().getBoolean(R.bool.is_use_all_motion_touch);
+            Log.d(TAG, "isUseAllMotionTouch() returning: " + result);
+            return result;
+        } catch (Exception e) {
+            Log.e(TAG, "Error in isUseAllMotionTouch()", e);
+            return true; // Default fallback value
+        }
     }
 
     /**
@@ -100,7 +138,19 @@ public class App {
      * @return
      */
     public boolean getConfig(int config) {
-        return mContext.getResources().getBoolean(config);
+        Log.d(TAG, "getConfig() called with config=" + config + ", mContext=" + mContext);
+        if (mContext == null) {
+            Log.e(TAG, "getConfig(): mContext is null! Returning default value");
+            return true; // Default fallback value
+        }
+        try {
+            boolean result = mContext.getResources().getBoolean(config);
+            Log.d(TAG, "getConfig() returning: " + result);
+            return result;
+        } catch (Exception e) {
+            Log.e(TAG, "Error in getConfig()", e);
+            return true; // Default fallback value
+        }
     }
 
     public boolean isUseBaseWriteAccelerator() {
