@@ -73,7 +73,7 @@ class _MyAppState extends State<MyApp> {
               androidCanvasVisible = !androidCanvasVisible;
             });
           },
-          backgroundColor: Colors.green,
+          backgroundColor: androidCanvasVisible ? Colors.green : Colors.red,
           child: const Icon(Icons.edit),
         ),
       ),
