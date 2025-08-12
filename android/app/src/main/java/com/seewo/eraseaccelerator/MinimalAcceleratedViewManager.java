@@ -105,26 +105,41 @@ public class MinimalAcceleratedViewManager {
                 Log.e(TAG, "DrawSurfaceView not found in layout!");
                 return null;
             }
+            Log.d(TAG, "DrawSurfaceView found: " + mDrawView.getClass().getSimpleName());
+            
             ((DrawSurfaceView) mDrawView).setVisibility(View.VISIBLE);
-            Log.d(TAG, "DrawSurfaceView found and set to visible");
+            Log.d(TAG, "DrawSurfaceView visibility set to VISIBLE");
+            
+            // Verify the view is properly set up
+            Log.d(TAG, "DrawSurfaceView details - Width: " + mDrawView.getView().getWidth() + 
+                      ", Height: " + mDrawView.getView().getHeight() + 
+                      ", Visibility: " + mDrawView.getView().getVisibility());
 
             // Init accelerator and state holder (using Activity context like the original)
-            Log.d(TAG, "Initializing RenderAcceleratorManager with Activity context...");
+            Log.d(TAG, "About to initialize RenderAcceleratorManager with Activity context...");
+            Log.d(TAG, "Activity context: " + activity);
+            
             try {
+                Log.d(TAG, "Calling RenderAcceleratorManager.init()...");
                 RenderAcceleratorManager.init(activity, false);
-                Log.d(TAG, "RenderAcceleratorManager.init() called");
+                Log.d(TAG, "RenderAcceleratorManager.init() completed successfully");
                 
                 // Check if platform is supported
+                Log.d(TAG, "Checking platform support...");
                 boolean platformSupported = RenderAcceleratorManager.isPlatformSupport();
                 Log.d(TAG, "Platform support for acceleration: " + platformSupported);
                 
                 if (!platformSupported) {
                     Log.w(TAG, "Platform does not support acceleration - will use fallback drawing");
+                } else {
+                    Log.d(TAG, "Platform supports acceleration - acceleration should be available");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error initializing RenderAcceleratorManager", e);
+                Log.e(TAG, "Exception during RenderAcceleratorManager initialization", e);
                 // Continue anyway - basic drawing should still work
             }
+            
+            Log.d(TAG, "RenderAcceleratorManager initialization phase completed");
 
             IToolbar dummyToolbar = new IToolbar() {
                 @Override
@@ -133,51 +148,71 @@ public class MinimalAcceleratedViewManager {
                 public void setStateHolder(StateHolder stateHolder) { /* no-op */ }
             };
 
-            Log.d(TAG, "Creating StateHolder with Activity context...");
-            mStateHolder = new StateHolder(activity, mDrawView, dummyToolbar);
-            Log.d(TAG, "StateHolder created");
+            Log.d(TAG, "About to create StateHolder with Activity context...");
+            Log.d(TAG, "StateHolder parameters - Activity: " + activity + ", DrawView: " + mDrawView + ", Toolbar: " + dummyToolbar);
+            
+            try {
+                mStateHolder = new StateHolder(activity, mDrawView, dummyToolbar);
+                Log.d(TAG, "StateHolder created successfully");
+            } catch (Exception e) {
+                Log.e(TAG, "Error creating StateHolder", e);
+                return null;
+            }
 
             // Get display metrics (using Activity like the original)
             DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
             
-            Log.d(TAG, "Screen dimensions: " + metrics.widthPixels + "x" + metrics.heightPixels);
-            Log.d(TAG, "Calling StateHolder.onCreate...");
+            Log.d(TAG, "Display metrics - Width: " + metrics.widthPixels + ", Height: " + metrics.heightPixels + 
+                      ", Density: " + metrics.density + ", DensityDpi: " + metrics.densityDpi);
+            
+            Log.d(TAG, "About to call StateHolder.onCreate...");
             try {
                 mStateHolder.onCreate(metrics.widthPixels, metrics.heightPixels);
                 Log.d(TAG, "StateHolder.onCreate completed successfully");
                 
                 // Verify the canvas is created
                 if (mStateHolder.getFullScreenCanvas() != null) {
-                    Log.d(TAG, "FullScreen canvas created successfully");
+                    Log.d(TAG, "FullScreen canvas created successfully - Canvas: " + mStateHolder.getFullScreenCanvas());
                 } else {
                     Log.w(TAG, "FullScreen canvas is null after onCreate");
                 }
                 
                 if (mStateHolder.getFullScreenBitmap() != null) {
-                    Log.d(TAG, "FullScreen bitmap created successfully");
+                    Log.d(TAG, "FullScreen bitmap created successfully - Bitmap: " + mStateHolder.getFullScreenBitmap() + 
+                              " (" + mStateHolder.getFullScreenBitmap().getWidth() + "x" + mStateHolder.getFullScreenBitmap().getHeight() + ")");
                 } else {
                     Log.w(TAG, "FullScreen bitmap is null after onCreate");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error in StateHolder.onCreate", e);
+                Log.e(TAG, "Exception in StateHolder.onCreate", e);
                 // Continue anyway - basic functionality might still work
             }
+            
+            Log.d(TAG, "StateHolder initialization phase completed");
 
             // Set render bounds to view rect when laid out
+            Log.d(TAG, "Setting up GlobalLayoutListener for render bounds...");
             ((DrawSurfaceView) mDrawView).getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
-                    Log.d(TAG, "OnGlobalLayout called");
+                    Log.d(TAG, "OnGlobalLayout called - view layout completed");
                     int[] loc = new int[2];
                     mDrawView.getView().getLocationOnScreen(loc);
                     Rect bounds = new Rect(loc[0], loc[1], loc[0] + mDrawView.getView().getWidth(), loc[1] + mDrawView.getView().getHeight());
-                    Log.d(TAG, "Setting render bounds: " + bounds);
-                    RenderAcceleratorManager.setRenderBounds(bounds);
+                    Log.d(TAG, "Calculated render bounds: " + bounds);
+                    
+                    try {
+                        RenderAcceleratorManager.setRenderBounds(bounds);
+                        Log.d(TAG, "Render bounds set successfully");
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error setting render bounds", e);
+                    }
                 }
             });
+            Log.d(TAG, "GlobalLayoutListener set up successfully");
 
             mIsInitialized = true;
-            Log.d(TAG, "MinimalAcceleratedViewManager initialized successfully");
+            Log.d(TAG, "=== MinimalAcceleratedViewManager initialization completed successfully ===");
             
         } catch (Exception e) {
             Log.e(TAG, "Error initializing MinimalAcceleratedViewManager", e);
