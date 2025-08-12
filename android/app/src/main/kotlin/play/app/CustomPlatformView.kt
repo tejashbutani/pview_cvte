@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.view.View
 import com.x.DrawSurfaceView
+import com.x.MinimalAcceleratedSurfaceView
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
@@ -14,25 +15,38 @@ class CustomPlatformView(
     creationParams: Map<String, Any>?
 ) : PlatformView, MethodChannel.MethodCallHandler {
 
-    private val drawView: DrawSurfaceView = DrawSurfaceView(context).apply {
-        setPenColor((creationParams?.get("color") as? Number)?.toInt() ?: Color.BLACK)
-        setPenWidth((creationParams?.get("width") as? Double)?.toFloat() ?: 5.0f)
-        setDashed(creationParams?.get("isDashed") as? Boolean ?: false)
-    }
+    // Company-specific drawing surface selection
+    private val useAcceleratedView = creationParams?.get("useAccelerated") as? Boolean ?: false
+    private val drawView: View
 
     init {
-        methodChannel.setMethodCallHandler(this)
-         drawView.setMethodChannel(methodChannel)
+        drawView = if (useAcceleratedView) {
+            MinimalAcceleratedSurfaceView(context).apply {
+                setPenColor((creationParams?.get("color") as? Number)?.toInt() ?: Color.BLACK)
+                setPenWidth((creationParams?.get("width") as? Double)?.toFloat() ?: 5.0f)
+                setDashed(creationParams?.get("isDashed") as? Boolean ?: false)
+                setMethodChannel(methodChannel)
+            }
+        } else {
+            DrawSurfaceView(context).apply {
+                setPenColor((creationParams?.get("color") as? Number)?.toInt() ?: Color.BLACK)
+                setPenWidth((creationParams?.get("width") as? Double)?.toFloat() ?: 5.0f)
+                setDashed(creationParams?.get("isDashed") as? Boolean ?: false)
+                setMethodChannel(methodChannel)
+            }
+        }
+    }
 
-         // Handle initial pen settings
+    // Secondary init block for common initialization
+    init {
+        methodChannel.setMethodCallHandler(this)
+        
+        // Handle initial pen settings
         val isDashed = creationParams?.get("isDashed") as? Boolean ?: false
-        drawView.setDashed(isDashed)
-//        drawView.updatePenColor(
-//             (creationParams?.get("color") as? Number)?.toInt() ?: Color.BLACK
-//         )
-//        drawView.updatePenWidth(
-//             (creationParams?.get("width") as? Double)?.toFloat() ?: 5.0f
-//         )
+        when (drawView) {
+            is DrawSurfaceView -> drawView.setDashed(isDashed)
+            is MinimalAcceleratedSurfaceView -> drawView.setDashed(isDashed)
+        }
     }
 
     override fun getView(): View {
@@ -41,39 +55,67 @@ class CustomPlatformView(
 
     override fun dispose() {
         methodChannel.setMethodCallHandler(null)
+        // Handle lifecycle for accelerated view
+        if (drawView is MinimalAcceleratedSurfaceView) {
+            drawView.onPause()
+        }
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "updatePenColor" -> {
                 val color = (call.argument<Number>("color"))?.toInt()
-                 android.util.Log.d("PenSettings", "Received method call - Color: $color")
+                android.util.Log.d("PenSettings", "Received method call - Color: $color")
                 if (color != null) {
-                    drawView.setPenColor(color)
+                    when (drawView) {
+                        is DrawSurfaceView -> drawView.setPenColor(color)
+                        is MinimalAcceleratedSurfaceView -> drawView.setPenColor(color)
+                    }
                     result.success(null)
                 } else {
-                     android.util.Log.e("PenSettings", "Invalid arguments - Color: $color")
+                    android.util.Log.e("PenSettings", "Invalid arguments - Color: $color")
                     result.error("INVALID_ARGUMENTS", "Color is null", null)
                 }
             }
             "updatePenWidth" -> {
                 val width = call.argument<Double>("width")
-                 android.util.Log.d("PenSettings", "Received method call Width: $width")
+                android.util.Log.d("PenSettings", "Received method call Width: $width")
                 if (width != null) {
-                    drawView.setPenWidth(width.toFloat())
+                    when (drawView) {
+                        is DrawSurfaceView -> drawView.setPenWidth(width.toFloat())
+                        is MinimalAcceleratedSurfaceView -> drawView.setPenWidth(width.toFloat())
+                    }
                     result.success(null)
                 } else {
-                     android.util.Log.e("PenSettings", "Invalid arguments - Width: $width")
+                    android.util.Log.e("PenSettings", "Invalid arguments - Width: $width")
                     result.error("INVALID_ARGUMENTS", "Width is null", null)
                 }
             }
             "setDashed" -> {
                 val isDashed = call.argument<Boolean>("dashed") ?: false
-                drawView.setDashed(isDashed)
+                when (drawView) {
+                    is DrawSurfaceView -> drawView.setDashed(isDashed)
+                    is MinimalAcceleratedSurfaceView -> drawView.setDashed(isDashed)
+                }
                 result.success(null)
             }
             "clear" -> {
-                drawView.clear()
+                when (drawView) {
+                    is DrawSurfaceView -> drawView.clear()
+                    is MinimalAcceleratedSurfaceView -> drawView.clear()
+                }
+                result.success(null)
+            }
+            "resume" -> {
+                if (drawView is MinimalAcceleratedSurfaceView) {
+                    drawView.onResume()
+                }
+                result.success(null)
+            }
+            "pause" -> {
+                if (drawView is MinimalAcceleratedSurfaceView) {
+                    drawView.onPause()
+                }
                 result.success(null)
             }
             else -> result.notImplemented()
