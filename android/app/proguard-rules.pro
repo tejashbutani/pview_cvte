@@ -1,0 +1,2 @@
+-keep class com.xbh**
+-keepclassmembers class com.xbh** {*;}
