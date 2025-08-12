@@ -3,6 +3,7 @@ package play.app
 import android.content.Context
 import android.graphics.Color
 import android.view.View
+import com.x.DrawSurfaceView
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
@@ -26,12 +27,12 @@ class CustomPlatformView(
          // Handle initial pen settings
         val isDashed = creationParams?.get("isDashed") as? Boolean ?: false
         drawView.setDashed(isDashed)
-        drawView.updatePenColor(
-             (creationParams?.get("color") as? Number)?.toInt() ?: Color.BLACK
-         )
-        drawView.updatePenWidth(
-             (creationParams?.get("width") as? Double)?.toFloat() ?: 5.0f
-         )
+//        drawView.updatePenColor(
+//             (creationParams?.get("color") as? Number)?.toInt() ?: Color.BLACK
+//         )
+//        drawView.updatePenWidth(
+//             (creationParams?.get("width") as? Double)?.toFloat() ?: 5.0f
+//         )
     }
 
     override fun getView(): View {

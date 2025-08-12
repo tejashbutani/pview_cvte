@@ -18,7 +18,7 @@ import java.lang.ref.WeakReference;
 
 /**
  * Minimal activity using the existing accelerated drawing pipeline
- * (DrawSurfaceView + StateHolder + RenderAcceleratorManager).
+ * (com.x.DrawSurfaceView + StateHolder + RenderAcceleratorManager).
  */
 public class MinimalAcceleratedActivity extends Activity {
 
