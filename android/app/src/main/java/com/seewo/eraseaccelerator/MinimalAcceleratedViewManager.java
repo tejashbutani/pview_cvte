@@ -119,10 +119,12 @@ public class MinimalAcceleratedViewManager {
             Log.d(TAG, "About to initialize RenderAcceleratorManager with Activity context...");
             Log.d(TAG, "Activity context: " + activity);
             
+            boolean accelerationInitialized = false;
             try {
-                Log.d(TAG, "Calling RenderAcceleratorManager.init()...");
+                Log.d(TAG, "Attempting RenderAcceleratorManager initialization...");
                 RenderAcceleratorManager.init(activity, false);
                 Log.d(TAG, "RenderAcceleratorManager.init() completed successfully");
+                accelerationInitialized = true;
                 
                 // Check if platform is supported
                 Log.d(TAG, "Checking platform support...");
@@ -134,9 +136,20 @@ public class MinimalAcceleratedViewManager {
                 } else {
                     Log.d(TAG, "Platform supports acceleration - acceleration should be available");
                 }
+            } catch (SecurityException e) {
+                Log.w(TAG, "SecurityException during acceleration init (Android 14+ restrictions): " + e.getMessage());
+                Log.d(TAG, "Continuing with basic drawing functionality");
+                accelerationInitialized = false;
             } catch (Exception e) {
                 Log.e(TAG, "Exception during RenderAcceleratorManager initialization", e);
-                // Continue anyway - basic drawing should still work
+                Log.d(TAG, "Continuing with basic drawing functionality");
+                accelerationInitialized = false;
+            }
+            
+            if (accelerationInitialized) {
+                Log.d(TAG, "Hardware acceleration initialized successfully");
+            } else {
+                Log.d(TAG, "Using fallback drawing mode (software rendering)");
             }
             
             Log.d(TAG, "RenderAcceleratorManager initialization phase completed");
