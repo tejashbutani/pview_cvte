@@ -55,7 +55,6 @@ class _MyAppState extends State<MyApp> {
                 creationParams: {
                   'color': Colors.black.value,
                   'width': 10,
-                  'useAccelerated': true, // Set to true for MinimalAcceleratedSurfaceView, false for DrawSurfaceView
                 },
                 creationParamsCodec: const StandardMessageCodec(),
                 onPlatformViewCreated: (int id) {

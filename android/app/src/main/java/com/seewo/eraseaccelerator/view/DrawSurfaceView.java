@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2020-07-24
  */
 public class DrawSurfaceView extends SurfaceView implements IDrawView, SurfaceHolder.Callback {
-    private static final String TAG = "com.x.DrawSurfaceView";
+    private static final String TAG = "com.seewo.eraseaccelerator.DrawSurfaceView";
 
     private Canvas mFullScreenCanvas;
     private SurfaceHolder mSurfaceHolder;
