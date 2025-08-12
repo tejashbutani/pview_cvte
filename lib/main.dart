@@ -71,7 +71,7 @@ class _MyAppState extends State<MyApp> {
             print("Toggling Canvas Visibility from $androidCanvasVisible to ${!androidCanvasVisible}");
             androidCanvasVisible = !androidCanvasVisible;
           });
-        }),
+        }, child: const Icon(Icons.edit),),
       ),
     );
   }

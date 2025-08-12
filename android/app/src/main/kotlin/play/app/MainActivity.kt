@@ -9,9 +9,9 @@ class MainActivity: FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
     //    var x = AccelerateDraw.getInstance()
-        flutterEngine
-            .platformViewsController
-            .registry
-            .registerViewFactory("custom_canvas_view", CustomViewFactory(flutterEngine.dartExecutor.binaryMessenger))
+//        flutterEngine
+//            .platformViewsController
+//            .registry
+//            .registerViewFactory("custom_canvas_view", CustomViewFactory(flutterEngine.dartExecutor.binaryMessenger))
     }
 }

@@ -1,0 +1,62 @@
+[
+    {
+        "merged": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-merged_res-26:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-main-21:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-merged_res-26:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-main-21:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-merged_res-26:/drawable-v21_launch_background.xml.flat",
+        "source": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-main-21:/drawable-v21/launch_background.xml"
+    },
+    {
+        "merged": "play.app-merged_res-26:/drawable-hdpi_image_bg_thumb.jpeg.flat",
+        "source": "play.app-main-21:/drawable-hdpi/image_bg_thumb.jpeg"
+    },
+    {
+        "merged": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-merged_res-26:/layout_layout_float_view.xml.flat",
+        "source": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-main-21:/layout/layout_float_view.xml"
+    },
+    {
+        "merged": "play.app-merged_res-26:/drawable-hdpi_toolbar_bg.9.png.flat",
+        "source": "play.app-main-21:/drawable-hdpi/toolbar_bg.9.png"
+    },
+    {
+        "merged": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-merged_res-26:/layout_activity_test_bitmap.xml.flat",
+        "source": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-main-21:/layout/activity_test_bitmap.xml"
+    },
+    {
+        "merged": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-merged_res-26:/layout_activity_write_accelerator.xml.flat",
+        "source": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-main-21:/layout/activity_write_accelerator.xml"
+    },
+    {
+        "merged": "play.app-merged_res-26:/drawable-hdpi_stroke_thumb.png.flat",
+        "source": "play.app-main-21:/drawable-hdpi/stroke_thumb.png"
+    },
+    {
+        "merged": "play.app-merged_res-26:/drawable-hdpi_pic_bg.jpeg.flat",
+        "source": "play.app-main-21:/drawable-hdpi/pic_bg.jpeg"
+    },
+    {
+        "merged": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-merged_res-26:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-main-21:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "play.app-merged_res-26:/drawable-hdpi_stroke_progress.png.flat",
+        "source": "play.app-main-21:/drawable-hdpi/stroke_progress.png"
+    },
+    {
+        "merged": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-merged_res-26:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-main-21:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "play.app-merged_res-26:/layout_activity_test_bitmap.xml.flat",
+        "source": "play.app-main-21:/layout/activity_test_bitmap.xml"
+    },
+    {
+        "merged": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-merged_res-26:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "/Users/tejashbutani/.gradle/daemon/8.3/play.app-main-21:/mipmap-xhdpi/ic_launcher.png"
+    }
+]
