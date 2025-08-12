@@ -65,7 +65,7 @@ class _MyAppState extends State<MyApp> {
                   androidViewChannel?.setMethodCallHandler(_handleMethodCall);
                 },
               ),
-            ),
+            ), 
           ],
         ),
         floatingActionButton: FloatingActionButton(
