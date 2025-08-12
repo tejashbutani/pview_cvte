@@ -120,30 +120,40 @@ public class MinimalAcceleratedViewManager {
             Log.d(TAG, "Activity context: " + activity);
             
             boolean accelerationInitialized = false;
-            try {
-                Log.d(TAG, "Attempting RenderAcceleratorManager initialization...");
-                RenderAcceleratorManager.init(activity, false);
-                Log.d(TAG, "RenderAcceleratorManager.init() completed successfully");
-                accelerationInitialized = true;
-                
-                // Check if platform is supported
-                Log.d(TAG, "Checking platform support...");
-                boolean platformSupported = RenderAcceleratorManager.isPlatformSupport();
-                Log.d(TAG, "Platform support for acceleration: " + platformSupported);
-                
-                if (!platformSupported) {
-                    Log.w(TAG, "Platform does not support acceleration - will use fallback drawing");
-                } else {
-                    Log.d(TAG, "Platform supports acceleration - acceleration should be available");
+            
+            // Check if we're on Android 14+ and need workaround
+            if (AccelerationWorkaround.hasAndroid14Restrictions()) {
+                Log.d(TAG, "Android 14+ detected, using workaround for acceleration initialization");
+                accelerationInitialized = AccelerationWorkaround.initializeAccelerationWithWorkaround(activity);
+            } else {
+                Log.d(TAG, "Using standard acceleration initialization");
+                try {
+                    RenderAcceleratorManager.init(activity, false);
+                    accelerationInitialized = true;
+                    Log.d(TAG, "Standard acceleration initialization successful");
+                } catch (Exception e) {
+                    Log.e(TAG, "Standard acceleration initialization failed", e);
+                    accelerationInitialized = false;
                 }
-            } catch (SecurityException e) {
-                Log.w(TAG, "SecurityException during acceleration init (Android 14+ restrictions): " + e.getMessage());
-                Log.d(TAG, "Continuing with basic drawing functionality");
-                accelerationInitialized = false;
-            } catch (Exception e) {
-                Log.e(TAG, "Exception during RenderAcceleratorManager initialization", e);
-                Log.d(TAG, "Continuing with basic drawing functionality");
-                accelerationInitialized = false;
+            }
+            
+            if (accelerationInitialized) {
+                try {
+                    // Check if platform is supported
+                    Log.d(TAG, "Checking platform support...");
+                    boolean platformSupported = RenderAcceleratorManager.isPlatformSupport();
+                    Log.d(TAG, "Platform support for acceleration: " + platformSupported);
+                    
+                    if (!platformSupported) {
+                        Log.w(TAG, "Platform does not support acceleration - will use fallback drawing");
+                    } else {
+                        Log.d(TAG, "Platform supports acceleration - acceleration should be available");
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error checking platform support", e);
+                }
+            } else {
+                Log.w(TAG, "Acceleration initialization failed, using fallback mode");
             }
             
             if (accelerationInitialized) {
@@ -248,15 +258,23 @@ public class MinimalAcceleratedViewManager {
         
         // Try to enable acceleration (like the original activity)
         try {
+            Log.d(TAG, "Attempting to enable acceleration rendering...");
             RenderAcceleratorManager.setRenderable(true);
-            Log.d(TAG, "RenderAcceleratorManager.setRenderable(true) called");
+            Log.d(TAG, "RenderAcceleratorManager.setRenderable(true) called successfully");
             
             // Verify if acceleration is actually working
             boolean platformSupported = RenderAcceleratorManager.isPlatformSupport();
             Log.d(TAG, "Platform support status during onResume: " + platformSupported);
             
+            if (platformSupported) {
+                Log.d(TAG, "Hardware acceleration should be active for real-time rendering");
+            } else {
+                Log.w(TAG, "Platform support indicates acceleration not available");
+            }
+            
         } catch (Exception e) {
-            Log.e(TAG, "Error setting renderable to true", e);
+            Log.e(TAG, "Error enabling acceleration rendering", e);
+            Log.d(TAG, "Will continue with software rendering (strokes visible after pen up)");
         }
         
         try {

@@ -1,4 +1,6 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:process="system">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" 
+          xmlns:tools="http://schemas.android.com/tools" 
+          android:process="system">
 
 <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Add these permissions -->
@@ -11,11 +13,22 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+    
+    <!-- System-level permissions for acceleration (may require system signature) -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" 
+                     tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.HARDWARE_TEST" 
+                     tools:ignore="ProtectedPermissions" />
     
     <!-- Hardware features for acceleration -->
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen.multitouch" android:required="false" />
     <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.opengles.aep" android:required="false" />
+    <uses-feature android:name="android.hardware.vulkan.level" android:required="false" />
 
     <application
         android:label="pview_cvte"
