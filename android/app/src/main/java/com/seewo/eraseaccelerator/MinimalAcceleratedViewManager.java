@@ -74,32 +74,20 @@ public class MinimalAcceleratedViewManager {
             }
             Log.d(TAG, "Found Activity: " + activity.getClass().getSimpleName());
 
-            // Initialize App singleton using the new ensureInitialized method
-            Log.d(TAG, "Ensuring App singleton is initialized...");
-            App.ensureInitialized(mContext);
-            App.ensureInitialized(activity); // Try with activity context too
+            // CRITICAL: Initialize App singleton FIRST using the Activity context (like the original)
+            Log.d(TAG, "Initializing App singleton with Activity context...");
+            App.ensureInitialized(activity);
             
             // Verify initialization
             App app = App.getInstance();
-            Log.d(TAG, "After ensureInitialized - App context: " + app.getContext());
+            Log.d(TAG, "App singleton initialized - context: " + app.getContext());
             
-            if (app.getContext() != null) {
-                Log.d(TAG, "App singleton verified as initialized");
-                try {
-                    boolean testBool = app.isUseAllMotionTouch();
-                    Log.d(TAG, "Test call to isUseAllMotionTouch(): " + testBool);
-                } catch (Exception e) {
-                    Log.e(TAG, "Error testing App.isUseAllMotionTouch()", e);
-                }
-            } else {
-                Log.e(TAG, "App context is STILL null after ensureInitialized!");
-                // Force initialization one more time
-                Log.d(TAG, "Force initializing App with activity context...");
-                app.init(activity);
-                Log.d(TAG, "Force init completed, context now: " + app.getContext());
+            if (app.getContext() == null) {
+                Log.e(TAG, "CRITICAL: App context is still null after initialization!");
+                return null;
             }
 
-            // Ensure container is registered for acceleration service
+            // Ensure container is registered for acceleration service (like the original)
             Log.d(TAG, "Registering with SystemUnlockUtil...");
             SystemUnlockUtil.addWriteAcceleratorContainer(new WeakReference<>(activity));
             Log.d(TAG, "SystemUnlockUtil registration successful");
@@ -120,18 +108,22 @@ public class MinimalAcceleratedViewManager {
             ((DrawSurfaceView) mDrawView).setVisibility(View.VISIBLE);
             Log.d(TAG, "DrawSurfaceView found and set to visible");
 
-            // Init accelerator and state holder
-            Log.d(TAG, "Initializing RenderAcceleratorManager...");
+            // Init accelerator and state holder (using Activity context like the original)
+            Log.d(TAG, "Initializing RenderAcceleratorManager with Activity context...");
             try {
-                RenderAcceleratorManager.init(mContext, false);
-                Log.d(TAG, "RenderAcceleratorManager initialized successfully");
+                RenderAcceleratorManager.init(activity, false);
+                Log.d(TAG, "RenderAcceleratorManager.init() called");
                 
                 // Check if platform is supported
                 boolean platformSupported = RenderAcceleratorManager.isPlatformSupport();
                 Log.d(TAG, "Platform support for acceleration: " + platformSupported);
+                
+                if (!platformSupported) {
+                    Log.w(TAG, "Platform does not support acceleration - will use fallback drawing");
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Error initializing RenderAcceleratorManager", e);
-                // Continue anyway - we'll handle the failures gracefully
+                // Continue anyway - basic drawing should still work
             }
 
             IToolbar dummyToolbar = new IToolbar() {
@@ -141,14 +133,12 @@ public class MinimalAcceleratedViewManager {
                 public void setStateHolder(StateHolder stateHolder) { /* no-op */ }
             };
 
-            Log.d(TAG, "Creating StateHolder...");
-            mStateHolder = new StateHolder(mContext, mDrawView, dummyToolbar);
+            Log.d(TAG, "Creating StateHolder with Activity context...");
+            mStateHolder = new StateHolder(activity, mDrawView, dummyToolbar);
             Log.d(TAG, "StateHolder created");
 
-            // Get display metrics
-            WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-            DisplayMetrics metrics = new DisplayMetrics();
-            wm.getDefaultDisplay().getMetrics(metrics);
+            // Get display metrics (using Activity like the original)
+            DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
             
             Log.d(TAG, "Screen dimensions: " + metrics.widthPixels + "x" + metrics.heightPixels);
             Log.d(TAG, "Calling StateHolder.onCreate...");
@@ -207,9 +197,16 @@ public class MinimalAcceleratedViewManager {
         }
         
         Log.d(TAG, "onResume starting...");
+        
+        // Try to enable acceleration (like the original activity)
         try {
             RenderAcceleratorManager.setRenderable(true);
             Log.d(TAG, "RenderAcceleratorManager.setRenderable(true) called");
+            
+            // Verify if acceleration is actually working
+            boolean platformSupported = RenderAcceleratorManager.isPlatformSupport();
+            Log.d(TAG, "Platform support status during onResume: " + platformSupported);
+            
         } catch (Exception e) {
             Log.e(TAG, "Error setting renderable to true", e);
         }
@@ -222,7 +219,7 @@ public class MinimalAcceleratedViewManager {
         }
         
         mIsRenderable = true;
-        Log.d(TAG, "onResume completed - rendering enabled (may have failures)");
+        Log.d(TAG, "onResume completed - acceleration status may vary");
     }
 
     /**
