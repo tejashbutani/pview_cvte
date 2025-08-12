@@ -265,25 +265,62 @@ public class MinimalAcceleratedViewManager {
         
         Log.d(TAG, "onResume starting...");
         
-        // CRITICAL: Enable acceleration EXACTLY like MinimalAcceleratedActivity.onResume()
-        try {
-            Log.d(TAG, "Calling RenderAcceleratorManager.setRenderable(true) - CRITICAL for real-time rendering");
-            RenderAcceleratorManager.setRenderable(true);
-            Log.d(TAG, "RenderAcceleratorManager.setRenderable(true) completed");
-            
-            // Verify platform support
-            boolean platformSupported = RenderAcceleratorManager.isPlatformSupport();
-            Log.d(TAG, "Platform support check: " + platformSupported);
-            
-            if (platformSupported) {
-                Log.d(TAG, "✓ Hardware acceleration is ENABLED - real-time rendering should work");
-            } else {
-                Log.w(TAG, "✗ Platform does not support acceleration - will fall back to software rendering");
+        // CRITICAL: Force enable acceleration with multiple retry attempts
+        boolean accelerationEnabled = false;
+        
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            try {
+                Log.d(TAG, "Acceleration attempt " + attempt + "/3: Calling RenderAcceleratorManager.setRenderable(true)");
+                
+                // CRITICAL: Try to bypass DRM access issues before enabling
+                if (attempt == 1) {
+                    Log.d(TAG, "Attempting to bypass DRM access restrictions...");
+                    AccelerationForcer.bypassDrmAccess();
+                }
+                
+                RenderAcceleratorManager.setRenderable(true);
+                Log.d(TAG, "RenderAcceleratorManager.setRenderable(true) call completed");
+                
+                // If standard approach fails, try force enablement
+                if (attempt == 2) {
+                    Log.d(TAG, "Attempting force enablement via reflection...");
+                    boolean forceResult = AccelerationForcer.forceEnableAcceleration();
+                    Log.d(TAG, "Force enablement result: " + forceResult);
+                }
+                
+                // Verify platform support
+                boolean platformSupported = RenderAcceleratorManager.isPlatformSupport();
+                Log.d(TAG, "Platform support check: " + platformSupported);
+                
+                if (platformSupported) {
+                    Log.d(TAG, "✓ Attempt " + attempt + ": Hardware acceleration ENABLED - real-time rendering should work");
+                    accelerationEnabled = true;
+                    break;
+                } else {
+                    Log.w(TAG, "✗ Attempt " + attempt + ": Platform support returned false, retrying...");
+                }
+                
+            } catch (Exception e) {
+                Log.e(TAG, "Attempt " + attempt + " failed to enable acceleration: " + e.getMessage());
+                if (attempt == 3) {
+                    Log.e(TAG, "All acceleration attempts failed - this will cause strokes to only appear after pen up");
+                }
             }
             
-        } catch (Exception e) {
-            Log.e(TAG, "CRITICAL ERROR: Failed to enable acceleration", e);
-            Log.e(TAG, "This will cause strokes to only appear after pen up");
+            // Short delay between attempts
+            if (attempt < 3 && !accelerationEnabled) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+        
+        if (accelerationEnabled) {
+            Log.d(TAG, "🚀 ACCELERATION SUCCESSFULLY ENABLED - Real-time strokes should work!");
+        } else {
+            Log.e(TAG, "❌ ACCELERATION FAILED - Strokes will only appear after pen up");
         }
         
         try {
