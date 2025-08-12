@@ -1,13 +1,9 @@
-package play.app
+package com.seewo.eraseaccelerator
 
 import android.content.Context
 import android.graphics.Color
-import android.util.DisplayMetrics
-import android.view.MotionEvent
 import android.view.View
 import com.seewo.eraseaccelerator.view.DrawSurfaceView
-import com.seewo.eraseaccelerator.StateHolder
-import com.seewo.eraseaccelerator.RenderAcceleratorManager
 import com.seewo.eraseaccelerator.view.IToolbar
 import com.seewo.easinote.accelerator.base.util.SystemUnlockUtil
 import io.flutter.plugin.common.MethodCall

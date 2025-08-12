@@ -60,6 +60,7 @@ public class StateHolder implements IFullScreenBitmapHolder {
         mBrushState = new BrushState(this, mContentCenter);
         mColorBackground = new ColorBackground();
         mBackground = mColorBackground;
+        mBrushState.setPenColor(Color.RED);
     }
 
     /**
@@ -89,7 +90,7 @@ public class StateHolder implements IFullScreenBitmapHolder {
     }
 
     public int getBackgroundColor() {
-        int color = Color.BLACK;
+        int color = Color.WHITE;
         if (mBackground instanceof ColorBackground) {
             color = ((ColorBackground) mBackground).getColor();
         }
@@ -207,7 +208,7 @@ public class StateHolder implements IFullScreenBitmapHolder {
 
     public void clearAllStroke() {
         mContentCenter.clear();
-        mFullScreenCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        mFullScreenCanvas.drawColor(Color.WHITE, PorterDuff.Mode.CLEAR);
         drawBackground();
         mContentCenter.redrawAll(mFullScreenCanvas);
         mDrawView.refreshView();

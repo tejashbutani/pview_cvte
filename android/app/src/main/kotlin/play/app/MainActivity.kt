@@ -2,7 +2,7 @@ package play.app
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-import android.os.Bundle
+import com.seewo.eraseaccelerator.CustomViewFactory
 
 class MainActivity: FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
