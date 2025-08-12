@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
         body: Stack(
           children: [
             Container(
-              color: Colors.green,
+              color: Colors.green.shade200,
             ),
             Visibility(
               maintainState: false,
@@ -66,12 +66,16 @@ class _MyAppState extends State<MyApp> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(onPressed: () {
-          setState(() {
-            print("Toggling Canvas Visibility from $androidCanvasVisible to ${!androidCanvasVisible}");
-            androidCanvasVisible = !androidCanvasVisible;
-          });
-        }, child: const Icon(Icons.edit),),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              print("Toggling Canvas Visibility from $androidCanvasVisible to ${!androidCanvasVisible}");
+              androidCanvasVisible = !androidCanvasVisible;
+            });
+          },
+          backgroundColor: Colors.green,
+          child: const Icon(Icons.edit),
+        ),
       ),
     );
   }
