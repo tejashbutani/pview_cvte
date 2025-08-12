@@ -1,5 +1,5 @@
--keep class com.xbh**
--keepclassmembers class com.xbh** {*;}
+-keep class com.seewo.**
+-keepclassmembers class com.seewo.** {*;}
 
 # Suppress warnings for missing display classes
 -dontwarn com.ifpdos.multidisplay.MultiDisplayApi
