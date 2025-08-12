@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import play.app.R;
+import com.seewo.eraseaccelerator.R;
 
 /**
  * 全局单例

@@ -15,9 +15,7 @@ import android.view.WindowManager;
 import com.seewo.easinote.accelerator.base.util.SystemUnlockUtil;
 import com.seewo.eraseaccelerator.view.DrawSurfaceView;
 import com.seewo.eraseaccelerator.view.IToolbar;
-
-import play.app.R;
-
+import com.seewo.eraseaccelerator.R;
 import java.lang.ref.WeakReference;
 
 /**
