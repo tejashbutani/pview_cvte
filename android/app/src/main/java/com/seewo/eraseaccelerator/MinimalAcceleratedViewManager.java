@@ -209,13 +209,6 @@ public class MinimalAcceleratedViewManager {
         return mRootView;
     }
 
-    public void setStrokeEventListener(StrokeEventListener listener) {
-        this.mStrokeEventListener = listener;
-        if (mStateHolder != null) {
-            mStateHolder.setStrokeEventListener(listener);
-        }
-    }
-
     /**
      * Handle resume lifecycle - extracted from MinimalAcceleratedActivity.onResume()
      */
