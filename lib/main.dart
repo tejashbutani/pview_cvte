@@ -16,6 +16,7 @@ class _MyAppState extends State<MyApp> {
   bool androidCanvasVisible = false;
 
   MethodChannel? androidViewChannel;
+  final List<Stroke> _strokes = [];
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
@@ -26,6 +27,11 @@ class _MyAppState extends State<MyApp> {
           final strokeData = Map<String, dynamic>.from(call.arguments);
           Stroke stroke = Stroke.fromJson(strokeData);
           print("Received Stroke: ${stroke.points.length}");
+          if (mounted) {
+            setState(() {
+              _strokes.add(stroke);
+            });
+          }
         } catch (e) {
           print('Error processing stroke data: $e');
         }
@@ -65,7 +71,14 @@ class _MyAppState extends State<MyApp> {
                   androidViewChannel?.setMethodCallHandler(_handleMethodCall);
                 },
               ),
-            ), 
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: StrokesPainter(_strokes),
+                ),
+              ),
+            ),
           ],
         ),
         floatingActionButton: FloatingActionButton(
@@ -112,5 +125,35 @@ class Stroke {
       width: json['width'] as double,
       isDashed: json['isDashed'] as bool? ?? false,
     );
+  }
+}
+
+class StrokesPainter extends CustomPainter {
+  final List<Stroke> strokes;
+
+  StrokesPainter(this.strokes);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final stroke in strokes) {
+      if (stroke.points.isEmpty) continue;
+      final paint = Paint()
+        ..color = stroke.color
+        ..strokeWidth = stroke.width
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round;
+
+      final path = Path()..moveTo(stroke.points.first.dx, stroke.points.first.dy);
+      for (int i = 1; i < stroke.points.length; i++) {
+        path.lineTo(stroke.points[i].dx, stroke.points[i].dy);
+      }
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant StrokesPainter oldDelegate) {
+    return oldDelegate.strokes != strokes;
   }
 }
