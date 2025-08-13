@@ -2,6 +2,7 @@ package com.seewo.eraseaccelerator;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,8 +42,15 @@ public class WriteAcceleratorActivity extends Activity {
 
         mStateHolder = new StateHolder(this, mIDrawView, mToolbar);
 
-        Log.d(TAG, "onCreate: width:" + App.getInstance().getScreenWidth() + ",height:" + App.getInstance().getScreenHeight());
-        mStateHolder.onCreate(App.getInstance().getScreenWidth(), App.getInstance().getScreenHeight());
+        int width = App.getInstance().getScreenWidth();
+        int height = App.getInstance().getScreenHeight();
+        if (width <= 0 || height <= 0) {
+            DisplayMetrics metrics = getResources().getDisplayMetrics();
+            width = metrics.widthPixels;
+            height = metrics.heightPixels;
+        }
+        Log.d(TAG, "onCreate: width:" + width + ",height:" + height);
+        mStateHolder.onCreate(width, height);
 
         mToolbar.setStateHolder(mStateHolder);
     }

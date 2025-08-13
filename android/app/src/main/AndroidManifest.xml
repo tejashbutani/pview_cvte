@@ -9,7 +9,7 @@
 
     <application
         android:label="pview_cvte"
-        android:name="${applicationName}"
+        android:name=".AcceleratorApplication"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
