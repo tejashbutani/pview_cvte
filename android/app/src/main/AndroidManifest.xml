@@ -40,7 +40,19 @@
             android:exported="false"
             android:hardwareAccelerated="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" />
-            
+
+             <activity android:name=".WriteAcceleratorActivity" 
+             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:exported="true">
+            <!--suppress AndroidElementNotAllowed -->
+            <layout
+                android:defaultWidth="978dp"
+                android:defaultHeight="550dp"
+                android:gravity="center"
+                android:minWidth="640dp"
+                android:minHeight="360dp"  />
+              </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

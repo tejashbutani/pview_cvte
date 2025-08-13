@@ -5,7 +5,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import android.content.Intent
 import android.os.Bundle
-import com.seewo.eraseaccelerator.MinimalAcceleratedActivity
+import com.seewo.eraseaccelerator.WriteAcceleratorActivity
 // import com.xbh.whiteboard.AccelerateDraw
 
 class MainActivity: FlutterActivity() {
@@ -17,7 +17,7 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "launchActivity" -> {
-                    val intent = Intent(this, MinimalAcceleratedActivity::class.java)
+                    val intent = Intent(this, WriteAcceleratorActivity::class.java)
                     startActivity(intent)
                     result.success(null)
                 }
