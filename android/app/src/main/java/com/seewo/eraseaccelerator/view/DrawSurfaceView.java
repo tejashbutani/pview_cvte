@@ -5,6 +5,8 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -65,6 +67,10 @@ public class DrawSurfaceView extends SurfaceView implements IDrawView, SurfaceHo
         mSurfaceHolder = getHolder();
         mSurfaceHolder.addCallback(this);
         mSurfaceHolder.setFormat(PixelFormat.TRANSLUCENT);
+        // Ensure transparent background and proper Z ordering for compositing over Flutter
+        setZOrderOnTop(true);
+        setZOrderMediaOverlay(true);
+        setBackgroundColor(Color.TRANSPARENT);
     }
 
     @Override
@@ -91,8 +97,12 @@ public class DrawSurfaceView extends SurfaceView implements IDrawView, SurfaceHo
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.d(TAG, "surfaceChanged: ");
-        mFullScreenCanvas = mSurfaceHolder.lockCanvas();
-        if (mFullScreenBitmapHolder != null && mFullScreenCanvas != null) {
+		mFullScreenCanvas = mSurfaceHolder.lockCanvas();
+		if (mFullScreenCanvas != null) {
+			// Clear to transparent to avoid any opaque background
+			mFullScreenCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+		}
+		if (mFullScreenBitmapHolder != null && mFullScreenCanvas != null) {
             Log.d(TAG, "drawFullScreenBitmap");
             mFullScreenBitmapHolder.drawFullScreenBitmap(mFullScreenCanvas);
             mSurfaceHolder.unlockCanvasAndPost(mFullScreenCanvas);
@@ -135,7 +145,10 @@ public class DrawSurfaceView extends SurfaceView implements IDrawView, SurfaceHo
     @Override
     public void redrawAll(List<Pen> penList) {
         Log.d(TAG, "redrawAll on SurfaceView.");
-        Canvas canvas = mSurfaceHolder.lockCanvas();
+		Canvas canvas = mSurfaceHolder.lockCanvas();
+		if (canvas != null) {
+			canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+		}
         for (Pen pen : penList) {
             pen.draw(canvas);
         }
@@ -144,8 +157,9 @@ public class DrawSurfaceView extends SurfaceView implements IDrawView, SurfaceHo
 
     @Override
     public void refreshView() {
-        mFullScreenCanvas = mSurfaceHolder.lockCanvas();
-        if (mFullScreenCanvas != null) {
+		mFullScreenCanvas = mSurfaceHolder.lockCanvas();
+		if (mFullScreenCanvas != null) {
+			mFullScreenCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             Log.d(TAG, "mFullScreenCanvas is not null.");
             mFullScreenBitmapHolder.drawFullScreenBitmap(mFullScreenCanvas);
             mSurfaceHolder.unlockCanvasAndPost(mFullScreenCanvas);

@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.graphics.Color;
 
 import com.seewo.easinote.accelerator.base.util.SystemUnlockUtil;
 import com.seewo.eraseaccelerator.view.DrawSurfaceView;
@@ -119,6 +120,9 @@ public class MinimalAcceleratedViewManager {
                 Log.e(TAG, "DrawSurfaceView not found in layout!");
                 return null;
             }
+            // Ensure transparent background on the host container and SurfaceView
+            mRootView.setBackgroundColor(Color.TRANSPARENT);
+            ((DrawSurfaceView) mDrawView).setBackgroundColor(Color.TRANSPARENT);
             ((DrawSurfaceView) mDrawView).setVisibility(View.VISIBLE);
             Log.d(TAG, "DrawSurfaceView found and set to visible");
 

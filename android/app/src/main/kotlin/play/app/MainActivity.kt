@@ -39,10 +39,5 @@ class MainActivity: FlutterActivity() {
             
         Log.d(TAG, "Platform view factory registered successfully")
         
-    //    var x = AccelerateDraw.getInstance()
-//        flutterEngine
-//            .platformViewsController
-//            .registry
-//            .registerViewFactory("custom_canvas_view", CustomViewFactory(flutterEngine.dartExecutor.binaryMessenger))
     }
 }

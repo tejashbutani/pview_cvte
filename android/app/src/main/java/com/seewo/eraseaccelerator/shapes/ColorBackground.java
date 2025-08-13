@@ -2,11 +2,12 @@ package com.seewo.eraseaccelerator.shapes;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 
 import com.seewo.eraseaccelerator.IBackground;
 
 public class ColorBackground implements IBackground {
-    private int mColor = Color.WHITE;
+    private int mColor = Color.TRANSPARENT;
 
     public void setBgColor(int color) {
         mColor = color;
@@ -14,7 +15,11 @@ public class ColorBackground implements IBackground {
 
     @Override
     public void draw(Canvas canvas) {
-        canvas.drawColor(mColor);
+        if (mColor == Color.TRANSPARENT) {
+            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        } else {
+            canvas.drawColor(mColor);
+        }
     }
 
     public int getColor() {

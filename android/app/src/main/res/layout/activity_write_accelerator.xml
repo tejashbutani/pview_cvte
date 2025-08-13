@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
 
     <com.seewo.eraseaccelerator.view.DrawSurfaceView
         android:id="@+id/draw_surface_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@android:color/transparent"
         android:visibility="invisible" />
 
     <com.seewo.eraseaccelerator.view.ToolbarView
@@ -14,16 +16,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:background="@android:color/transparent"
+        android:visibility="gone"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp">
 
-        <LinearLayout
+            <LinearLayout
             android:id="@+id/background"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/toolbar_bg"
+                android:background="@android:color/transparent"
             android:orientation="horizontal">
 
             <Button
