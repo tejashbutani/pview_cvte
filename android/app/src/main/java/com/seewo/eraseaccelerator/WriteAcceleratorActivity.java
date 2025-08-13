@@ -109,5 +109,5 @@ public class WriteAcceleratorActivity extends Activity {
     public boolean onTouchEvent(MotionEvent event) {
         mStateHolder.onTouchEvent(event);
         return true;
-    }
+    } 
 }
