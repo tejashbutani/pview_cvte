@@ -20,6 +20,8 @@ import com.seewo.eraseaccelerator.view.IToolbar;
 import play.app.R;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Manager class that handles the accelerated drawing logic extracted from MinimalAcceleratedActivity
@@ -328,5 +330,37 @@ public class MinimalAcceleratedViewManager {
      */
     public boolean isRenderable() {
         return mIsRenderable;
+    }
+
+    public void setStrokeEventListener(StrokeEventListener listener) {
+        this.mStrokeEventListener = listener;
+        if (mStateHolder != null) {
+            mStateHolder.setStrokeEventListener(stroke -> {
+                try {
+                    int[] loc = new int[2];
+                    mDrawView.getView().getLocationOnScreen(loc);
+                    int width = mDrawView.getView().getWidth();
+                    int height = mDrawView.getView().getHeight();
+
+                    Map<String, Object> payload = new HashMap<>();
+                    payload.put("stroke", stroke);
+                    Map<String, Object> view = new HashMap<>();
+                    view.put("x", loc[0]);
+                    view.put("y", loc[1]);
+                    view.put("width", width);
+                    view.put("height", height);
+                    payload.put("view", view);
+
+                    if (mStrokeEventListener != null) {
+                        mStrokeEventListener.onStrokeComplete(payload);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error enriching stroke payload", e);
+                    if (mStrokeEventListener != null) {
+                        mStrokeEventListener.onStrokeComplete(stroke);
+                    }
+                }
+            });
+        }
     }
 }

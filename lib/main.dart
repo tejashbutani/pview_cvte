@@ -17,6 +17,7 @@ class _MyAppState extends State<MyApp> {
 
   MethodChannel? androidViewChannel;
   final List<Stroke> _strokes = [];
+  Rect? _viewFramePx; // Android view frame reported from native in physical px
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
@@ -24,7 +25,19 @@ class _MyAppState extends State<MyApp> {
         try {
           print("Received Strokes from Channel");
 
-          final strokeData = Map<String, dynamic>.from(call.arguments);
+          final payload = Map<String, dynamic>.from(call.arguments);
+          final strokeData = Map<String, dynamic>.from(payload['stroke'] ?? payload);
+          final viewInfoRaw = payload['view'];
+          if (viewInfoRaw != null) {
+            final viewInfo = Map<String, dynamic>.from(viewInfoRaw);
+            final double vx = (viewInfo['x'] as num).toDouble();
+            final double vy = (viewInfo['y'] as num).toDouble();
+            final double vw = (viewInfo['width'] as num).toDouble();
+            final double vh = (viewInfo['height'] as num).toDouble();
+            print("View frame(px): x=$vx y=$vy w=$vw h=$vh");
+            _viewFramePx = Rect.fromLTWH(vx, vy, vw, vh);
+          }
+
           Stroke stroke = Stroke.fromJson(strokeData);
           print("Received Stroke: ${stroke.points.length}");
           if (mounted) {
@@ -41,6 +54,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final dpr = MediaQuery.of(context).devicePixelRatio;
     return MaterialApp(
       title: '',
       theme: ThemeData(
@@ -75,7 +89,11 @@ class _MyAppState extends State<MyApp> {
             Positioned.fill(
               child: IgnorePointer(
                 child: CustomPaint(
-                  painter: StrokesPainter(_strokes),
+                  painter: StrokesPainter(
+                    _strokes,
+                    devicePixelRatio: dpr,
+                    viewFramePx: _viewFramePx,
+                  ),
                 ),
               ),
             ),
@@ -130,11 +148,22 @@ class Stroke {
 
 class StrokesPainter extends CustomPainter {
   final List<Stroke> strokes;
+  final double devicePixelRatio;
+  final Rect? viewFramePx; // physical px frame of the Android view (origin on screen)
 
-  StrokesPainter(this.strokes);
+  StrokesPainter(this.strokes, {required this.devicePixelRatio, this.viewFramePx});
 
   @override
   void paint(Canvas canvas, Size size) {
+    // If native coordinates are in physical px relative to the Android View,
+    // account for devicePixelRatio and translate by the view's position, if provided.
+    final double scale = devicePixelRatio <= 0 ? 1.0 : (1.0 / devicePixelRatio);
+    canvas.save();
+    if (viewFramePx != null) {
+      canvas.translate(viewFramePx!.left * scale, viewFramePx!.top * scale);
+    }
+    canvas.scale(scale, scale);
+
     for (final stroke in strokes) {
       if (stroke.points.isEmpty) continue;
       final paint = Paint()
@@ -150,6 +179,8 @@ class StrokesPainter extends CustomPainter {
       }
       canvas.drawPath(path, paint);
     }
+
+    canvas.restore();
   }
 
   @override

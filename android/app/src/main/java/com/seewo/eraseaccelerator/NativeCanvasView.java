@@ -47,9 +47,9 @@ public class NativeCanvasView implements PlatformView {
 
             // Wire stroke events to Flutter
             if (methodChannel != null) {
-                mViewManager.setStrokeEventListener(stroke -> {
+                mViewManager.setStrokeEventListener(strokePayload -> {
                     try {
-                        methodChannel.invokeMethod("onStrokeComplete", stroke);
+                        methodChannel.invokeMethod("onStrokeComplete", strokePayload);
                     } catch (Exception e) {
                         Log.e(TAG, "Error invoking onStrokeComplete", e);
                     }
