@@ -7,7 +7,7 @@ import android.widget.Button;
 
 import com.seewo.eraseaccelerator.StateHolder;
 
-import play.app.R;
+import com.seewo.eraseaccelerator.R;
 
 public class Toolbar implements IToolbar {
 

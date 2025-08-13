@@ -1,4 +1,4 @@
-package play.app
+package com.seewo.eraseaccelerator
 
 import android.content.Context
 import android.view.View
