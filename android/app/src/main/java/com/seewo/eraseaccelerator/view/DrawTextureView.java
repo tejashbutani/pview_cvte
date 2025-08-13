@@ -75,8 +75,13 @@ public class DrawTextureView extends TextureView implements IDrawView, TextureVi
         // Initialize state holder
         mStateHolder = new StateHolder(mContext, this, dummyToolbar);
         
-        // Initialize acceleration
-        RenderAcceleratorManager.init(mContext, false);
+        // Initialize acceleration with error handling
+        try {
+            RenderAcceleratorManager.init(mContext, false);
+            Log.d(TAG, "RenderAcceleratorManager initialized successfully");
+        } catch (Exception e) {
+            Log.w(TAG, "RenderAcceleratorManager initialization failed, continuing without acceleration: " + e.getMessage());
+        }
         
         // Setup canvas dimensions
         post(() -> {
@@ -88,10 +93,15 @@ public class DrawTextureView extends TextureView implements IDrawView, TextureVi
     }
     
     private void setRenderBounds() {
-        int[] loc = new int[2];
-        getLocationOnScreen(loc);
-        Rect bounds = new Rect(loc[0], loc[1], loc[0] + getWidth(), loc[1] + getHeight());
-        RenderAcceleratorManager.setRenderBounds(bounds);
+        try {
+            int[] loc = new int[2];
+            getLocationOnScreen(loc);
+            Rect bounds = new Rect(loc[0], loc[1], loc[0] + getWidth(), loc[1] + getHeight());
+            RenderAcceleratorManager.setRenderBounds(bounds);
+            Log.d(TAG, "Render bounds set: " + bounds);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to set render bounds: " + e.getMessage());
+        }
     }
 
     @Override
@@ -191,6 +201,9 @@ public class DrawTextureView extends TextureView implements IDrawView, TextureVi
             mStateHolder.onCreate(width, height);
             setRenderBounds();
         }
+        
+        // Draw a test pattern to verify TextureView is working
+        drawTestPattern();
     }
 
     @Override
@@ -320,6 +333,8 @@ public class DrawTextureView extends TextureView implements IDrawView, TextureVi
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        Log.d(TAG, "Touch event received: " + event.getAction() + " at (" + event.getX() + ", " + event.getY() + ")");
+        
         if (mStateHolder != null) {
             mStateHolder.onTouchEvent(event);
             return true;
@@ -359,21 +374,33 @@ public class DrawTextureView extends TextureView implements IDrawView, TextureVi
         if (mStateHolder != null) {
             mStateHolder.onResume();
         }
-        RenderAcceleratorManager.setRenderable(true);
+        try {
+            RenderAcceleratorManager.setRenderable(true);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to set renderable true: " + e.getMessage());
+        }
     }
     
     public void onPause() {
         if (mStateHolder != null) {
             mStateHolder.onPause();
         }
-        RenderAcceleratorManager.setRenderable(false);
+        try {
+            RenderAcceleratorManager.setRenderable(false);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to set renderable false: " + e.getMessage());
+        }
     }
     
     public void onDestroy() {
         if (mStateHolder != null) {
             mStateHolder.onDestroy();
         }
-        RenderAcceleratorManager.destroy();
+        try {
+            RenderAcceleratorManager.destroy();
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to destroy RenderAcceleratorManager: " + e.getMessage());
+        }
     }
     
     /**
@@ -381,5 +408,47 @@ public class DrawTextureView extends TextureView implements IDrawView, TextureVi
      */
     public StateHolder getStateHolder() {
         return mStateHolder;
+    }
+    
+    /**
+     * Draw a test pattern to verify TextureView is working
+     */
+    private void drawTestPattern() {
+        if (mSurface == null) return;
+        
+        Canvas canvas = null;
+        try {
+            canvas = mSurface.lockCanvas(null);
+            if (canvas != null) {
+                // Clear canvas with semi-transparent background
+                canvas.drawColor(0x80FFFFFF); // Semi-transparent white
+                
+                // Draw test pattern
+                android.graphics.Paint paint = new android.graphics.Paint();
+                paint.setAntiAlias(true);
+                
+                // Draw a red circle in top-left
+                paint.setColor(android.graphics.Color.RED);
+                canvas.drawCircle(100, 100, 50, paint);
+                
+                // Draw a green rectangle in center
+                paint.setColor(android.graphics.Color.GREEN);
+                canvas.drawRect(getWidth()/2 - 100, getHeight()/2 - 50, 
+                               getWidth()/2 + 100, getHeight()/2 + 50, paint);
+                
+                // Draw text
+                paint.setColor(android.graphics.Color.BLUE);
+                paint.setTextSize(48);
+                canvas.drawText("TextureView Active", 50, getHeight() - 100, paint);
+                
+                Log.d(TAG, "Test pattern drawn successfully");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error drawing test pattern: " + e.getMessage());
+        } finally {
+            if (canvas != null) {
+                mSurface.unlockCanvasAndPost(canvas);
+            }
+        }
     }
 }

@@ -36,6 +36,7 @@ class CustomTexturePlatformView(
             // Send each stroke to Flutter
             for (stroke in strokes) {
                 try {
+                    Log.d(TAG, "Sending stroke with ${stroke.points.size} points to Flutter")
                     methodChannel.invokeMethod("onStrokeComplete", stroke.toMap())
                 } catch (e: Exception) {
                     Log.e(TAG, "Error sending stroke to Flutter: ${e.message}")

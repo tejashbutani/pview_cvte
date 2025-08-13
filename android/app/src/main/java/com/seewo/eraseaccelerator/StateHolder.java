@@ -50,7 +50,7 @@ public class StateHolder implements IFullScreenBitmapHolder {
         }
     };
 
-    StateHolder(Context context, IDrawView drawView, IToolbar toolbar) {
+    public StateHolder(Context context, IDrawView drawView, IToolbar toolbar) {
         mContext = context;
         mDrawView = drawView;
         mDrawView.setFullScreenBitmapHolder(this);
@@ -65,7 +65,7 @@ public class StateHolder implements IFullScreenBitmapHolder {
     /**
      * open framebuffer
      */
-    void onCreate(int widthPixels, int heightPixels) {
+    public void onCreate(int widthPixels, int heightPixels) {
         mFullScreenBitmap = Bitmap.createBitmap(widthPixels, heightPixels, Bitmap.Config.ARGB_8888);
         mFullScreenCanvas = new Canvas(mFullScreenBitmap);
 
@@ -104,7 +104,7 @@ public class StateHolder implements IFullScreenBitmapHolder {
     /**
      * close framebuffer
      */
-    void onDestroy() {
+    public void onDestroy() {
         if (App.getInstance().isCanCallBitmapRecycleMethod() && null != mFullScreenBitmap && !mFullScreenBitmap.isRecycled()) {
             mFullScreenBitmap.recycle();
         }
@@ -126,7 +126,7 @@ public class StateHolder implements IFullScreenBitmapHolder {
     /**
      * @param event pointer touch event
      */
-    void onTouchEvent(MotionEvent event) {
+    public void onTouchEvent(MotionEvent event) {
         int action = event.getAction();
 //        if (mIsRoamOn) {
 //            // 漫游状态
