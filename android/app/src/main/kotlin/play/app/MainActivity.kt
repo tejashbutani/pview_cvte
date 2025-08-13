@@ -27,10 +27,13 @@ class MainActivity: FlutterActivity() {
             }
         }
         
-    //    var x = AccelerateDraw.getInstance()
-//        flutterEngine
-//            .platformViewsController
-//            .registry
-//            .registerViewFactory("custom_canvas_view", CustomViewFactory(flutterEngine.dartExecutor.binaryMessenger))
+        // Register the TextureView factory for PlatformView integration
+        flutterEngine
+            .platformViewsController
+            .registry
+            .registerViewFactory(
+                "custom_texture_view", 
+                CustomTextureViewFactory(flutterEngine.dartExecutor.binaryMessenger)
+            )
     }
 }

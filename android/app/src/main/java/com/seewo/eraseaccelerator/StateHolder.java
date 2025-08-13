@@ -270,4 +270,8 @@ public class StateHolder implements IFullScreenBitmapHolder {
     public void refreshDrawView() {
         mDrawView.refreshView();
     }
+    
+    public ContentCenter getContentCenter() {
+        return mContentCenter;
+    }
 }
