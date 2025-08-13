@@ -6,6 +6,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.graphics.Rect;
 
 import com.seewo.easinote.accelerator.base.util.SystemUnlockUtil;
 import com.seewo.eraseaccelerator.view.DrawSurfaceView;
@@ -38,7 +40,11 @@ public class WriteAcceleratorActivity extends Activity {
 
         mToolbar = new Toolbar(this);
 
-        RenderAcceleratorManager.init(this, false);
+        try {
+            RenderAcceleratorManager.init(this, false);
+        } catch (Exception e) {
+            Log.w(TAG, "Accelerator init failed: " + e.getMessage());
+        }
 
         mStateHolder = new StateHolder(this, mIDrawView, mToolbar);
 
@@ -53,12 +59,33 @@ public class WriteAcceleratorActivity extends Activity {
         mStateHolder.onCreate(width, height);
 
         mToolbar.setStateHolder(mStateHolder);
+
+        // Set accelerator render bounds to the draw view rect after layout
+        mIDrawView.getView().getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int[] loc = new int[2];
+                mIDrawView.getView().getLocationOnScreen(loc);
+                Rect bounds = new Rect(
+                        loc[0],
+                        loc[1],
+                        loc[0] + mIDrawView.getView().getWidth(),
+                        loc[1] + mIDrawView.getView().getHeight()
+                );
+                try {
+                    RenderAcceleratorManager.setRenderBounds(bounds);
+                } catch (Exception e) {
+                    Log.w(TAG, "Failed to set render bounds: " + e.getMessage());
+                }
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Log.i(TAG, " onResume");
+        try { RenderAcceleratorManager.setRenderable(true); } catch (Exception ignored) {}
         mStateHolder.onResume();
     }
 
@@ -67,6 +94,7 @@ public class WriteAcceleratorActivity extends Activity {
         Log.i(TAG, " onPause");
         super.onPause();
         mStateHolder.onPause();
+        try { RenderAcceleratorManager.setRenderable(false); } catch (Exception ignored) {}
     }
 
     @Override

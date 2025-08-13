@@ -45,6 +45,7 @@
              android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
             android:screenOrientation="landscape"
             android:exported="true"
+            android:hardwareAccelerated="true"
             android:theme="@android:style/Theme.Light.NoTitleBar">
             <!--suppress AndroidElementNotAllowed -->
             <layout
