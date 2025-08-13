@@ -37,6 +37,7 @@ public class StateHolder implements IFullScreenBitmapHolder {
     private IBackground mBackground;
     private ColorBackground mColorBackground;
     private IToolbar mToolbar;
+    private StrokeEventListener mStrokeEventListener;
     private Context mContext;
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
     private Runnable mTouchUpRunnable = new Runnable() {
@@ -60,6 +61,10 @@ public class StateHolder implements IFullScreenBitmapHolder {
         mBrushState = new BrushState(this, mContentCenter);
         mColorBackground = new ColorBackground();
         mBackground = mColorBackground;
+    }
+
+    public void setStrokeEventListener(StrokeEventListener listener) {
+        this.mStrokeEventListener = listener;
     }
 
     /**
@@ -152,6 +157,18 @@ public class StateHolder implements IFullScreenBitmapHolder {
                 Log.d(TAG, "Touch Up---");
                 mCurrentState.onTouchEvent(event);
                 mMainHandler.postDelayed(mTouchUpRunnable, 300);
+                // Notify Flutter with the last completed stroke if available
+                if (mStrokeEventListener != null) {
+                    try {
+                        List<Pen> pens = mContentCenter.getAllPens();
+                        if (pens != null && !pens.isEmpty()) {
+                            Pen latest = pens.get(pens.size() - 1);
+                            mStrokeEventListener.onStrokeComplete(latest.toMap());
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error notifying stroke complete", e);
+                    }
+                }
                 break;
             }
             default: {

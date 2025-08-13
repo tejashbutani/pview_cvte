@@ -31,11 +31,12 @@ class MainActivity: FlutterActivity() {
         
         Log.d(TAG, "Registering accelerated_canvas_view platform view factory")
         
-        // Register the accelerated canvas platform view
+        // Register the accelerated canvas platform view with a BinaryMessenger
+        val messenger = flutterEngine.dartExecutor.binaryMessenger
         flutterEngine
             .platformViewsController
             .registry
-            .registerViewFactory("accelerated_canvas_view", NativeCanvasViewFactory())
+            .registerViewFactory("accelerated_canvas_view", NativeCanvasViewFactory(messenger))
             
         Log.d(TAG, "Platform view factory registered successfully")
         

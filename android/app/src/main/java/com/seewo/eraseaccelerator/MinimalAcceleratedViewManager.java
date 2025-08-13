@@ -34,6 +34,7 @@ public class MinimalAcceleratedViewManager {
     private View mRootView;
     private boolean mIsInitialized = false;
     private boolean mIsRenderable = false;
+    private StrokeEventListener mStrokeEventListener;
 
     public MinimalAcceleratedViewManager(Context context) {
         mContext = context;
@@ -149,6 +150,9 @@ public class MinimalAcceleratedViewManager {
 
             Log.d(TAG, "Creating StateHolder...");
             mStateHolder = new StateHolder(mContext, mDrawView, dummyToolbar);
+            if (mStrokeEventListener != null) {
+                mStateHolder.setStrokeEventListener(mStrokeEventListener);
+            }
             Log.d(TAG, "StateHolder created");
 
             // Get display metrics
@@ -201,6 +205,13 @@ public class MinimalAcceleratedViewManager {
         }
 
         return mRootView;
+    }
+
+    public void setStrokeEventListener(StrokeEventListener listener) {
+        this.mStrokeEventListener = listener;
+        if (mStateHolder != null) {
+            mStateHolder.setStrokeEventListener(listener);
+        }
     }
 
     /**

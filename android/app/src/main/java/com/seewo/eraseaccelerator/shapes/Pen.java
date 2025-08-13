@@ -12,6 +12,8 @@ import android.graphics.RectF;
 import android.util.Log;
 
 import com.seewo.eraseaccelerator.util.RectUtil;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.util.ArrayList;
 
@@ -223,6 +225,22 @@ public class Pen {
 
     public PointF get(int index) {
         return mPoints.get(index);
+    }
+
+    public Map<String, Object> toMap() {
+        ArrayList<Map<String, Object>> pts = new ArrayList<>();
+        for (PointF p : mPoints) {
+            Map<String, Object> point = new HashMap<>();
+            point.put("x", (double) p.x);
+            point.put("y", (double) p.y);
+            pts.add(point);
+        }
+        Map<String, Object> out = new HashMap<>();
+        out.put("points", pts);
+        out.put("color", getPaint().getColor());
+        out.put("width", (double) getPaint().getStrokeWidth());
+        out.put("isDashed", false);
+        return out;
     }
 
     public Paint getPaint() {
