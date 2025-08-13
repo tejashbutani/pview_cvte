@@ -30,7 +30,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "play.app"
+    namespace = "com.seewo.eraseaccelerator"
     compileSdk = 34
     ndkVersion = flutter.ndkVersion
     buildToolsVersion '30.0.3'
@@ -46,7 +46,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "play.app"
+        applicationId = "com.seewo.eraseaccelerator"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24
@@ -76,6 +76,9 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.system
         }
+         debug {
+            signingConfig = signingConfigs.system
+        }
     }
 
     lintOptions {
@@ -85,6 +88,12 @@ android {
 
 flutter {
     source = "../.."
+}
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
 }
 
 dependencies {
