@@ -153,6 +153,8 @@ class StrokesPainter extends CustomPainter {
 
   StrokesPainter(this.strokes, {required this.devicePixelRatio, this.viewFramePx});
 
+  bool overlap = false;
+
   @override
   void paint(Canvas canvas, Size size) {
     // If native coordinates are in physical px relative to the Android View,
@@ -167,8 +169,8 @@ class StrokesPainter extends CustomPainter {
     for (final stroke in strokes) {
       if (stroke.points.isEmpty) continue;
       final paint = Paint()
-        ..color = stroke.color
-        ..strokeWidth = stroke.width
+        ..color = overlap ? stroke.color : Colors.red
+        ..strokeWidth = overlap ? stroke.width : stroke.width + 2
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round;
