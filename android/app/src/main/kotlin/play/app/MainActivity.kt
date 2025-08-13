@@ -2,12 +2,31 @@ package play.app
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
+import android.content.Intent
 import android.os.Bundle
+import com.seewo.eraseaccelerator.MinimalAcceleratedActivity
 // import com.xbh.whiteboard.AccelerateDraw
 
 class MainActivity: FlutterActivity() {
+    private val CHANNEL = "com.example.flutter_android_activity"
+    
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "launchActivity" -> {
+                    val intent = Intent(this, MinimalAcceleratedActivity::class.java)
+                    startActivity(intent)
+                    result.success(null)
+                }
+                else -> {
+                    result.notImplemented()
+                }
+            }
+        }
+        
     //    var x = AccelerateDraw.getInstance()
 //        flutterEngine
 //            .platformViewsController

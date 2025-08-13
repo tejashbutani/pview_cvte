@@ -16,6 +16,7 @@ class _MyAppState extends State<MyApp> {
   bool androidCanvasVisible = false;
 
   MethodChannel? androidViewChannel;
+  static const platformMethodChannel = MethodChannel('com.example.flutter_android_activity');
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
@@ -30,6 +31,15 @@ class _MyAppState extends State<MyApp> {
           print('Error processing stroke data: $e');
         }
         break;
+    }
+  }
+
+  void _launchAndroidActivity() async {
+    try {
+      await platformMethodChannel.invokeMethod('launchActivity');
+      print("Launched MinimalAcceleratedActivity");
+    } catch (e) {
+      print('Error launching activity: $e');
     }
   }
 
@@ -66,15 +76,29 @@ class _MyAppState extends State<MyApp> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              print("Toggling Canvas Visibility from $androidCanvasVisible to ${!androidCanvasVisible}");
-              androidCanvasVisible = !androidCanvasVisible;
-            });
-          },
-          backgroundColor: androidCanvasVisible ? Colors.green : Colors.red,
-          child: const Icon(Icons.edit),
+        floatingActionButton: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FloatingActionButton(
+              onPressed: _launchAndroidActivity,
+              backgroundColor: Colors.blue,
+              heroTag: "native_activity_fab",
+              tooltip: 'Launch Native Activity',
+              child: const Icon(Icons.android),
+            ),
+            const SizedBox(height: 16),
+            FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  print("Toggling Canvas Visibility from $androidCanvasVisible to ${!androidCanvasVisible}");
+                  androidCanvasVisible = !androidCanvasVisible;
+                });
+              },
+              backgroundColor: androidCanvasVisible ? Colors.green : Colors.red,
+              heroTag: "canvas_toggle_fab",
+              child: const Icon(Icons.edit),
+            ),
+          ],
         ),
       ),
     );
