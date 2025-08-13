@@ -153,7 +153,7 @@ class StrokesPainter extends CustomPainter {
 
   StrokesPainter(this.strokes, {required this.devicePixelRatio, this.viewFramePx});
 
-  bool overlap = false;
+  bool overlap = false; 
 
   @override
   void paint(Canvas canvas, Size size) {
