@@ -77,20 +77,51 @@ public class Pen {
             // Use the average of both scales to maintain aspect ratio
             sScaleFactor = (scaleX + scaleY) / 2.0f;
             
+            Log.d(TAG, "=== COORDINATE SCALING DEBUG ===");
             Log.d(TAG, "Display metrics: " + metrics.widthPixels + "x" + metrics.heightPixels);
+            Log.d(TAG, "Display density: " + metrics.density);
+            Log.d(TAG, "Display densityDpi: " + metrics.densityDpi);
             Log.d(TAG, "Target resolution: " + targetWidth + "x" + targetHeight);
             Log.d(TAG, "Scale factors - X: " + scaleX + ", Y: " + scaleY);
             Log.d(TAG, "Final scale factor: " + sScaleFactor);
+            Log.d(TAG, "=================================");
             
             sScaleFactorInitialized = true;
         }
+    }
+    
+    /**
+     * Get current scale factor for debugging
+     */
+    public static float getScaleFactor() {
+        return sScaleFactor;
+    }
+    
+    /**
+     * Get display metrics information
+     */
+    public static Map<String, Object> getDisplayInfo(Context context) {
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics metrics = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(metrics);
+        
+        Map<String, Object> displayInfo = new HashMap<>();
+        displayInfo.put("widthPixels", metrics.widthPixels);
+        displayInfo.put("heightPixels", metrics.heightPixels);
+        displayInfo.put("density", (double) metrics.density);
+        displayInfo.put("densityDpi", metrics.densityDpi);
+        displayInfo.put("scaleFactor", (double) sScaleFactor);
+        
+        return displayInfo;
     }
 
     /**
      * Apply scaling to coordinates to match Flutter coordinate system
      */
     private float scaleCoordinate(float coordinate) {
-        return coordinate * sScaleFactor;
+        // For now, let's not apply scaling to see the raw coordinates
+        // return coordinate * sScaleFactor;
+        return coordinate;
     }
 
     public Pen(Pen src) {
@@ -119,9 +150,14 @@ public class Pen {
         mPath.reset();
         mCreatingPath.reset();
 
+        Log.d(TAG, "startStroke - Original coordinates: (" + x + ", " + y + ")");
+        Log.d(TAG, "startStroke - Scale factor: " + sScaleFactor);
+        
         // Apply scaling to coordinates
         float scaledX = scaleCoordinate(x);
         float scaledY = scaleCoordinate(y);
+        
+        Log.d(TAG, "startStroke - Scaled coordinates: (" + scaledX + ", " + scaledY + ")");
 
         mPreviousX = scaledX;
         mPreviousY = scaledY;
@@ -137,9 +173,13 @@ public class Pen {
     }
 
     public void continueStroke(float x, float y, Rect dirtyRect) {
+        Log.d(TAG, "continueStroke - Original coordinates: (" + x + ", " + y + ")");
+        
         // Apply scaling to coordinates
         float scaledX = scaleCoordinate(x);
         float scaledY = scaleCoordinate(y);
+        
+        Log.d(TAG, "continueStroke - Scaled coordinates: (" + scaledX + ", " + scaledY + ")");
         
         boolean isPathChanged = updateSegmentPath(dirtyRect, mCreatingPath, scaledX, scaledY);
         if (isPathChanged) {
@@ -294,6 +334,15 @@ public class Pen {
         out.put("color", getPaint().getColor());
         out.put("width", (double) getPaint().getStrokeWidth());
         out.put("isDashed", false);
+        out.put("scaleFactor", (double) sScaleFactor);
+        
+        Log.d(TAG, "toMap - Stroke with " + mPoints.size() + " points, scale factor: " + sScaleFactor);
+        if (!mPoints.isEmpty()) {
+            PointF first = mPoints.get(0);
+            PointF last = mPoints.get(mPoints.size() - 1);
+            Log.d(TAG, "toMap - First point: (" + first.x + ", " + first.y + "), Last point: (" + last.x + ", " + last.y + ")");
+        }
+        
         return out;
     }
 
