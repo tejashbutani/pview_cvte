@@ -1,5 +1,6 @@
 package com.seewo.eraseaccelerator.shapes;
 
+import android.content.Context;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -37,16 +38,22 @@ public class Pen {
     private Paint mPaint;
     protected float mStroke;
     private final ArrayList<PointF> mPoints;
+    private Context mContext; // Added for density scaling
 
     public Pen(float strokeWidth) {
-        this(strokeWidth, Color.WHITE);
+        this(strokeWidth, Color.WHITE, null);
     }
 
     public Pen(float strokeWidth, int color) {
+        this(strokeWidth, color, null);
+    }
+
+    public Pen(float strokeWidth, int color, Context context) {
         Log.d(TAG, "Pen: " + strokeWidth);
         mPath = new Path();
         mCreatingPath = new Path();
         mPoints = new ArrayList<PointF>();
+        mContext = context;
 
         initPaint(strokeWidth, color);
     }
@@ -229,16 +236,23 @@ public class Pen {
 
     public Map<String, Object> toMap() {
         ArrayList<Map<String, Object>> pts = new ArrayList<>();
+        
+        // Get density for scaling coordinates to Flutter
+        float density = 1.0f;
+        if (mContext != null) {
+            density = mContext.getResources().getDisplayMetrics().density;
+        }
+        
         for (PointF p : mPoints) {
             Map<String, Object> point = new HashMap<>();
-            point.put("x", (double) p.x);
-            point.put("y", (double) p.y);
+            point.put("x", (double) (p.x / density));
+            point.put("y", (double) (p.y / density));
             pts.add(point);
         }
         Map<String, Object> out = new HashMap<>();
         out.put("points", pts);
         out.put("color", getPaint().getColor());
-        out.put("width", (double) getPaint().getStrokeWidth());
+        out.put("width", (double) (getPaint().getStrokeWidth() / density));
         out.put("isDashed", false);
         return out;
     }

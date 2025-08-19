@@ -17,7 +17,6 @@ class _MyAppState extends State<MyApp> {
 
   MethodChannel? androidViewChannel;
   final List<Stroke> _strokes = [];
-  // Removed _viewFramePx - using direct 1:1 coordinate mapping since both canvases are 3840x2160
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
@@ -27,8 +26,7 @@ class _MyAppState extends State<MyApp> {
 
           final payload = Map<String, dynamic>.from(call.arguments);
           final strokeData = Map<String, dynamic>.from(payload['stroke'] ?? payload);
-          // Removed view frame processing - using direct coordinate mapping
-
+          
           Stroke stroke = Stroke.fromJson(strokeData);
           print("Received Stroke: ${stroke.points.length}");
           if (mounted) {
@@ -142,19 +140,19 @@ class StrokesPainter extends CustomPainter {
 
   StrokesPainter(this.strokes, {required this.devicePixelRatio});
 
-  bool overlap = false; // Enable stroke superimposition for dual canvas approach 
+  bool overlap = false; 
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Direct 1:1 coordinate mapping since both Java and Flutter canvases are 3840x2160
-    // No scaling or translation needed - coordinates from Java canvas map directly to Flutter canvas
+    // Scale coordinates back up since Java sends density-scaled coordinates
     canvas.save();
-
+    canvas.scale(devicePixelRatio, devicePixelRatio);
+    
     for (final stroke in strokes) {
       if (stroke.points.isEmpty) continue;
       final paint = Paint()
-        ..color = overlap ? stroke.color : Colors.red
-        ..strokeWidth = overlap ? stroke.width : stroke.width + 2
+        ..color = stroke.color
+        ..strokeWidth = stroke.width
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round;
@@ -165,7 +163,7 @@ class StrokesPainter extends CustomPainter {
       }
       canvas.drawPath(path, paint);
     }
-
+    
     canvas.restore();
   }
 

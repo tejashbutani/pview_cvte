@@ -1,5 +1,6 @@
 package com.seewo.eraseaccelerator.state;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.Point;
@@ -133,7 +134,7 @@ public class BrushState extends AbstractState {
         float y = (event.getY(actionIndex));
         int pointerId = event.getPointerId(actionIndex);
 
-        mPens[pointerId] = new Pen(mStrokeWidth, mPenColor);
+        mPens[pointerId] = new Pen(mStrokeWidth, mPenColor, App.getInstance().getContext());
         mLastPoints[pointerId] = new Point();
 
         mPens[pointerId].startStroke(x, y);
