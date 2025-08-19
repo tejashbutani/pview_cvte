@@ -1,0 +1,2 @@
+/Users/tejashbutani/pocs/pview_cvte/android/app/.cxx/RelWithDebInfo/3d6o5621/x86_64/CMakeFiles/edit_cache.dir
+/Users/tejashbutani/pocs/pview_cvte/android/app/.cxx/RelWithDebInfo/3d6o5621/x86_64/CMakeFiles/rebuild_cache.dir

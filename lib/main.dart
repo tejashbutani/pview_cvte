@@ -17,7 +17,7 @@ class _MyAppState extends State<MyApp> {
 
   MethodChannel? androidViewChannel;
   final List<Stroke> _strokes = [];
-  Rect? _viewFramePx; // Android view frame reported from native in physical px
+  // Removed _viewFramePx - using direct 1:1 coordinate mapping since both canvases are 3840x2160
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
@@ -27,16 +27,7 @@ class _MyAppState extends State<MyApp> {
 
           final payload = Map<String, dynamic>.from(call.arguments);
           final strokeData = Map<String, dynamic>.from(payload['stroke'] ?? payload);
-          final viewInfoRaw = payload['view'];
-          if (viewInfoRaw != null) {
-            final viewInfo = Map<String, dynamic>.from(viewInfoRaw);
-            final double vx = (viewInfo['x'] as num).toDouble();
-            final double vy = (viewInfo['y'] as num).toDouble();
-            final double vw = (viewInfo['width'] as num).toDouble();
-            final double vh = (viewInfo['height'] as num).toDouble();
-            print("View frame(px): x=$vx y=$vy w=$vw h=$vh");
-            _viewFramePx = Rect.fromLTWH(vx, vy, vw, vh);
-          }
+          // Removed view frame processing - using direct coordinate mapping
 
           Stroke stroke = Stroke.fromJson(strokeData);
           print("Received Stroke: ${stroke.points.length}");
@@ -92,7 +83,6 @@ class _MyAppState extends State<MyApp> {
                   painter: StrokesPainter(
                     _strokes,
                     devicePixelRatio: dpr,
-                    viewFramePx: _viewFramePx,
                   ),
                 ),
               ),
@@ -149,22 +139,16 @@ class Stroke {
 class StrokesPainter extends CustomPainter {
   final List<Stroke> strokes;
   final double devicePixelRatio;
-  final Rect? viewFramePx; // physical px frame of the Android view (origin on screen)
 
-  StrokesPainter(this.strokes, {required this.devicePixelRatio, this.viewFramePx});
+  StrokesPainter(this.strokes, {required this.devicePixelRatio});
 
-  bool overlap = false; 
+  bool overlap = false; // Enable stroke superimposition for dual canvas approach 
 
   @override
   void paint(Canvas canvas, Size size) {
-    // If native coordinates are in physical px relative to the Android View,
-    // account for devicePixelRatio and translate by the view's position, if provided.
-    final double scale = devicePixelRatio <= 0 ? 1.0 : (1.0 / devicePixelRatio);
+    // Direct 1:1 coordinate mapping since both Java and Flutter canvases are 3840x2160
+    // No scaling or translation needed - coordinates from Java canvas map directly to Flutter canvas
     canvas.save();
-    if (viewFramePx != null) {
-      canvas.translate(viewFramePx!.left * scale, viewFramePx!.top * scale);
-    }
-    canvas.scale(scale, scale);
 
     for (final stroke in strokes) {
       if (stroke.points.isEmpty) continue;
