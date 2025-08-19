@@ -152,20 +152,16 @@ public class Pen {
 
         Log.d(TAG, "startStroke - Original coordinates: (" + x + ", " + y + ")");
         Log.d(TAG, "startStroke - Scale factor: " + sScaleFactor);
-        
-        // Apply scaling to coordinates
-        float scaledX = scaleCoordinate(x);
-        float scaledY = scaleCoordinate(y);
-        
-        Log.d(TAG, "startStroke - Scaled coordinates: (" + scaledX + ", " + scaledY + ")");
 
-        mPreviousX = scaledX;
-        mPreviousY = scaledY;
-        mLastMidX = scaledX;
-        mLastMidY = scaledY;
-        mPath.moveTo(round(scaledX), round(scaledY));
+        // Use original coordinates for Java drawing (Canvas operations)
+        mPreviousX = x;
+        mPreviousY = y;
+        mLastMidX = x;
+        mLastMidY = y;
+        mPath.moveTo(round(x), round(y));
 
-        savePoint(scaledX, scaledY);
+        // Save original coordinates (scaling will be applied only when sending to Flutter)
+        savePoint(x, y);
     }
 
     private void savePoint(float x, float y) {
@@ -175,24 +171,20 @@ public class Pen {
     public void continueStroke(float x, float y, Rect dirtyRect) {
         Log.d(TAG, "continueStroke - Original coordinates: (" + x + ", " + y + ")");
         
-        // Apply scaling to coordinates
-        float scaledX = scaleCoordinate(x);
-        float scaledY = scaleCoordinate(y);
-        
-        Log.d(TAG, "continueStroke - Scaled coordinates: (" + scaledX + ", " + scaledY + ")");
-        
-        boolean isPathChanged = updateSegmentPath(dirtyRect, mCreatingPath, scaledX, scaledY);
+        // Use original coordinates for Java drawing (Canvas operations)
+        boolean isPathChanged = updateSegmentPath(dirtyRect, mCreatingPath, x, y);
         if (isPathChanged) {
             mPath.addPath(mCreatingPath);
         }
 
-        mLastMidX = (scaledX + mPreviousX) / 2.0F;
-        mLastMidY = (scaledY + mPreviousY) / 2.0F;
+        mLastMidX = (x + mPreviousX) / 2.0F;
+        mLastMidY = (y + mPreviousY) / 2.0F;
 
-        mPreviousX = scaledX;
-        mPreviousY = scaledY;
+        mPreviousX = x;
+        mPreviousY = y;
 
-        savePoint(scaledX, scaledY);
+        // Save original coordinates (scaling will be applied only when sending to Flutter)
+        savePoint(x, y);
     }
 
     // avoid burr
@@ -212,12 +204,9 @@ public class Pen {
     }
 
     public void endStroke(float x, float y, Rect dirtyRect) {
-        // Apply scaling to coordinates
-        float scaledX = scaleCoordinate(x);
-        float scaledY = scaleCoordinate(y);
-        
-        float f1 = (scaledX + mPreviousX) / 2.0F;
-        float f2 = (scaledY + mPreviousY) / 2.0F;
+        // Use original coordinates for Java drawing (Canvas operations)
+        float f1 = (x + mPreviousX) / 2.0F;
+        float f2 = (y + mPreviousY) / 2.0F;
 
         mCreatingPath.reset();
         mCreatingPath.moveTo(round(mLastMidX), round(mLastMidY));
@@ -228,10 +217,11 @@ public class Pen {
         RectUtil.pointsToRect(dirtyRect, (int) mLastMidX, (int) mLastMidY, (int) mPreviousX, (int) mPreviousY, (int) f1, (int) f2);
         RectUtil.expandBound(mPaint.getStrokeWidth(), dirtyRect);
 
-        mPreviousX = scaledX;
-        mPreviousY = scaledY;
+        mPreviousX = x;
+        mPreviousY = y;
 
-        savePoint(scaledX, scaledY);
+        // Save original coordinates (scaling will be applied only when sending to Flutter)
+        savePoint(x, y);
     }
 
     public boolean updateSegmentPath(Rect dirtyRect, Path segmentPath, float x, float y) {
@@ -325,8 +315,11 @@ public class Pen {
         ArrayList<Map<String, Object>> pts = new ArrayList<>();
         for (PointF p : mPoints) {
             Map<String, Object> point = new HashMap<>();
-            point.put("x", (double) p.x);
-            point.put("y", (double) p.y);
+            // Apply scaling only when sending coordinates to Flutter
+            float scaledX = scaleCoordinate(p.x);
+            float scaledY = scaleCoordinate(p.y);
+            point.put("x", (double) scaledX);
+            point.put("y", (double) scaledY);
             pts.add(point);
         }
         Map<String, Object> out = new HashMap<>();
@@ -343,9 +336,15 @@ public class Pen {
         if (!mPoints.isEmpty()) {
             PointF first = mPoints.get(0);
             PointF last = mPoints.get(mPoints.size() - 1);
-            Log.d(TAG, "toMap - First point: (" + first.x + ", " + first.y + ")");
-            Log.d(TAG, "toMap - Last point: (" + last.x + ", " + last.y + ")");
-            Log.d(TAG, "toMap - Stroke bounds: " + getBounds());
+            float scaledFirstX = scaleCoordinate(first.x);
+            float scaledFirstY = scaleCoordinate(first.y);
+            float scaledLastX = scaleCoordinate(last.x);
+            float scaledLastY = scaleCoordinate(last.y);
+            Log.d(TAG, "toMap - First point (original): (" + first.x + ", " + first.y + ")");
+            Log.d(TAG, "toMap - First point (scaled): (" + scaledFirstX + ", " + scaledFirstY + ")");
+            Log.d(TAG, "toMap - Last point (original): (" + last.x + ", " + last.y + ")");
+            Log.d(TAG, "toMap - Last point (scaled): (" + scaledLastX + ", " + scaledLastY + ")");
+            Log.d(TAG, "toMap - Java stroke bounds: " + getBounds());
         }
         Log.d(TAG, "========================");
         
