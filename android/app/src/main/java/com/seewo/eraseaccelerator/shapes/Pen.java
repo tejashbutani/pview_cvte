@@ -66,24 +66,25 @@ public class Pen {
             DisplayMetrics metrics = new DisplayMetrics();
             wm.getDefaultDisplay().getMetrics(metrics);
             
-            // Fixed screen resolution is 3840x2160
-            float targetWidth = 3840f;
-            float targetHeight = 2160f;
-            
-            // Calculate scaling factor based on actual vs target resolution
-            float scaleX = metrics.widthPixels / targetWidth;
-            float scaleY = metrics.heightPixels / targetHeight;
-            
-            // Use the average of both scales to maintain aspect ratio
-            sScaleFactor = (scaleX + scaleY) / 2.0f;
-            
             Log.d(TAG, "=== COORDINATE SCALING DEBUG ===");
             Log.d(TAG, "Display metrics: " + metrics.widthPixels + "x" + metrics.heightPixels);
             Log.d(TAG, "Display density: " + metrics.density);
             Log.d(TAG, "Display densityDpi: " + metrics.densityDpi);
-            Log.d(TAG, "Target resolution: " + targetWidth + "x" + targetHeight);
-            Log.d(TAG, "Scale factors - X: " + scaleX + ", Y: " + scaleY);
-            Log.d(TAG, "Final scale factor: " + sScaleFactor);
+            
+            // Since the display is already 3840x2160, the issue might be coordinate system differences
+            // between the Java native view and Flutter's coordinate system.
+            // Let's try a density-based scaling approach instead
+            
+            // Standard density is 160 dpi (mdpi)
+            float standardDensity = 160f;
+            float densityScale = metrics.densityDpi / standardDensity;
+            
+            // For now, let's use density scaling to see if it helps with alignment
+            sScaleFactor = 1.0f / densityScale; // Inverse scaling to normalize coordinates
+            
+            Log.d(TAG, "Standard density: " + standardDensity);
+            Log.d(TAG, "Device density scale: " + densityScale);
+            Log.d(TAG, "Applied scale factor: " + sScaleFactor);
             Log.d(TAG, "=================================");
             
             sScaleFactorInitialized = true;
@@ -119,9 +120,8 @@ public class Pen {
      * Apply scaling to coordinates to match Flutter coordinate system
      */
     private float scaleCoordinate(float coordinate) {
-        // For now, let's not apply scaling to see the raw coordinates
-        // return coordinate * sScaleFactor;
-        return coordinate;
+        // Apply the calculated scale factor to transform coordinates
+        return coordinate * sScaleFactor;
     }
 
     public Pen(Pen src) {
@@ -335,13 +335,19 @@ public class Pen {
         out.put("width", (double) getPaint().getStrokeWidth());
         out.put("isDashed", false);
         out.put("scaleFactor", (double) sScaleFactor);
+        out.put("scaleFactorInitialized", sScaleFactorInitialized);
         
-        Log.d(TAG, "toMap - Stroke with " + mPoints.size() + " points, scale factor: " + sScaleFactor);
+        Log.d(TAG, "=== STROKE DATA DEBUG ===");
+        Log.d(TAG, "toMap - Stroke with " + mPoints.size() + " points");
+        Log.d(TAG, "toMap - Scale factor: " + sScaleFactor + " (initialized: " + sScaleFactorInitialized + ")");
         if (!mPoints.isEmpty()) {
             PointF first = mPoints.get(0);
             PointF last = mPoints.get(mPoints.size() - 1);
-            Log.d(TAG, "toMap - First point: (" + first.x + ", " + first.y + "), Last point: (" + last.x + ", " + last.y + ")");
+            Log.d(TAG, "toMap - First point: (" + first.x + ", " + first.y + ")");
+            Log.d(TAG, "toMap - Last point: (" + last.x + ", " + last.y + ")");
+            Log.d(TAG, "toMap - Stroke bounds: " + getBounds());
         }
+        Log.d(TAG, "========================");
         
         return out;
     }

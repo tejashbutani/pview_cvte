@@ -157,12 +157,18 @@ public class MinimalAcceleratedViewManager {
             }
             Log.d(TAG, "StateHolder created");
 
-            // Get display metrics
+            // Get display metrics and initialize coordinate scaling
             WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
             DisplayMetrics metrics = new DisplayMetrics();
             wm.getDefaultDisplay().getMetrics(metrics);
             
             Log.d(TAG, "Screen dimensions: " + metrics.widthPixels + "x" + metrics.heightPixels);
+            
+            // Initialize coordinate scaling for Pen class
+            Log.d(TAG, "Initializing coordinate scaling...");
+            com.seewo.eraseaccelerator.shapes.Pen.initializeScaleFactor(mContext);
+            Log.d(TAG, "Coordinate scaling initialized with factor: " + com.seewo.eraseaccelerator.shapes.Pen.getScaleFactor());
+            
             Log.d(TAG, "Calling StateHolder.onCreate...");
             try {
                 mStateHolder.onCreate(metrics.widthPixels, metrics.heightPixels);
