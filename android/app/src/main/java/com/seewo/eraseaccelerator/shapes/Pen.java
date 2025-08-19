@@ -48,7 +48,9 @@ public class Pen {
     }
 
     public Pen(float strokeWidth, int color) {
-        Log.d(TAG, "Pen: " + strokeWidth);
+        Log.d(TAG, "Pen constructor - requested stroke width: " + strokeWidth);
+        Log.d(TAG, "Pen constructor - scale factor initialized: " + sScaleFactorInitialized + ", factor: " + sScaleFactor);
+        
         mPath = new Path();
         mCreatingPath = new Path();
         mPoints = new ArrayList<PointF>();
@@ -129,12 +131,24 @@ public class Pen {
     }
 
     private void initPaint(float strokeWidth, int color) {
-        mStroke = strokeWidth;
+        mStroke = strokeWidth; // Store original stroke width for Flutter
+        
+        // Apply inverse scaling to stroke width for Java drawing
+        // If coordinates are scaled down by factor, stroke width should be scaled up
+        float javaStrokeWidth = strokeWidth;
+        if (sScaleFactorInitialized && sScaleFactor > 0) {
+            javaStrokeWidth = strokeWidth / sScaleFactor; // Inverse of coordinate scaling
+        }
+        
+        Log.d(TAG, "initPaint - Original stroke width: " + strokeWidth);
+        Log.d(TAG, "initPaint - Java stroke width (scaled): " + javaStrokeWidth);
+        Log.d(TAG, "initPaint - Scale factor: " + sScaleFactor);
+        
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
 
         mPaint.setColor(color);
-        mPaint.setStrokeWidth(strokeWidth);
+        mPaint.setStrokeWidth(javaStrokeWidth); // Use scaled width for Java drawing
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -325,7 +339,7 @@ public class Pen {
         Map<String, Object> out = new HashMap<>();
         out.put("points", pts);
         out.put("color", getPaint().getColor());
-        out.put("width", (double) getPaint().getStrokeWidth());
+        out.put("width", (double) mStroke); // Use original stroke width for Flutter
         out.put("isDashed", false);
         out.put("scaleFactor", (double) sScaleFactor);
         out.put("scaleFactorInitialized", sScaleFactorInitialized);
@@ -333,6 +347,8 @@ public class Pen {
         Log.d(TAG, "=== STROKE DATA DEBUG ===");
         Log.d(TAG, "toMap - Stroke with " + mPoints.size() + " points");
         Log.d(TAG, "toMap - Scale factor: " + sScaleFactor + " (initialized: " + sScaleFactorInitialized + ")");
+        Log.d(TAG, "toMap - Original stroke width (for Flutter): " + mStroke);
+        Log.d(TAG, "toMap - Java stroke width (scaled): " + getPaint().getStrokeWidth());
         if (!mPoints.isEmpty()) {
             PointF first = mPoints.get(0);
             PointF last = mPoints.get(mPoints.size() - 1);
