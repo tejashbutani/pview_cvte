@@ -16,6 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import java.util.ArrayList;
+import android.content.Context;
+import android.util.DisplayMetrics;
+import android.view.WindowManager;
 
 public class Pen {
 
@@ -37,6 +40,8 @@ public class Pen {
     private Paint mPaint;
     protected float mStroke;
     private final ArrayList<PointF> mPoints;
+    private static float sScaleFactor = 1.0f;
+    private static boolean sScaleFactorInitialized = false;
 
     public Pen(float strokeWidth) {
         this(strokeWidth, Color.WHITE);
@@ -49,6 +54,43 @@ public class Pen {
         mPoints = new ArrayList<PointF>();
 
         initPaint(strokeWidth, color);
+    }
+
+    /**
+     * Initialize the scaling factor based on display metrics
+     * This should be called once when the application starts
+     */
+    public static void initializeScaleFactor(Context context) {
+        if (!sScaleFactorInitialized) {
+            WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+            DisplayMetrics metrics = new DisplayMetrics();
+            wm.getDefaultDisplay().getMetrics(metrics);
+            
+            // Fixed screen resolution is 3840x2160
+            float targetWidth = 3840f;
+            float targetHeight = 2160f;
+            
+            // Calculate scaling factor based on actual vs target resolution
+            float scaleX = metrics.widthPixels / targetWidth;
+            float scaleY = metrics.heightPixels / targetHeight;
+            
+            // Use the average of both scales to maintain aspect ratio
+            sScaleFactor = (scaleX + scaleY) / 2.0f;
+            
+            Log.d(TAG, "Display metrics: " + metrics.widthPixels + "x" + metrics.heightPixels);
+            Log.d(TAG, "Target resolution: " + targetWidth + "x" + targetHeight);
+            Log.d(TAG, "Scale factors - X: " + scaleX + ", Y: " + scaleY);
+            Log.d(TAG, "Final scale factor: " + sScaleFactor);
+            
+            sScaleFactorInitialized = true;
+        }
+    }
+
+    /**
+     * Apply scaling to coordinates to match Flutter coordinate system
+     */
+    private float scaleCoordinate(float coordinate) {
+        return coordinate * sScaleFactor;
     }
 
     public Pen(Pen src) {
@@ -77,13 +119,17 @@ public class Pen {
         mPath.reset();
         mCreatingPath.reset();
 
-        mPreviousX = x;
-        mPreviousY = y;
-        mLastMidX = x;
-        mLastMidY = y;
-        mPath.moveTo(round(x), round(y));
+        // Apply scaling to coordinates
+        float scaledX = scaleCoordinate(x);
+        float scaledY = scaleCoordinate(y);
 
-        savePoint(x, y);
+        mPreviousX = scaledX;
+        mPreviousY = scaledY;
+        mLastMidX = scaledX;
+        mLastMidY = scaledY;
+        mPath.moveTo(round(scaledX), round(scaledY));
+
+        savePoint(scaledX, scaledY);
     }
 
     private void savePoint(float x, float y) {
@@ -91,18 +137,22 @@ public class Pen {
     }
 
     public void continueStroke(float x, float y, Rect dirtyRect) {
-        boolean isPathChanged = updateSegmentPath(dirtyRect, mCreatingPath, x, y);
+        // Apply scaling to coordinates
+        float scaledX = scaleCoordinate(x);
+        float scaledY = scaleCoordinate(y);
+        
+        boolean isPathChanged = updateSegmentPath(dirtyRect, mCreatingPath, scaledX, scaledY);
         if (isPathChanged) {
             mPath.addPath(mCreatingPath);
         }
 
-        mLastMidX = (x + mPreviousX) / 2.0F;
-        mLastMidY = (y + mPreviousY) / 2.0F;
+        mLastMidX = (scaledX + mPreviousX) / 2.0F;
+        mLastMidY = (scaledY + mPreviousY) / 2.0F;
 
-        mPreviousX = x;
-        mPreviousY = y;
+        mPreviousX = scaledX;
+        mPreviousY = scaledY;
 
-        savePoint(x, y);
+        savePoint(scaledX, scaledY);
     }
 
     // avoid burr
@@ -122,8 +172,12 @@ public class Pen {
     }
 
     public void endStroke(float x, float y, Rect dirtyRect) {
-        float f1 = (x + mPreviousX) / 2.0F;
-        float f2 = (y + mPreviousY) / 2.0F;
+        // Apply scaling to coordinates
+        float scaledX = scaleCoordinate(x);
+        float scaledY = scaleCoordinate(y);
+        
+        float f1 = (scaledX + mPreviousX) / 2.0F;
+        float f2 = (scaledY + mPreviousY) / 2.0F;
 
         mCreatingPath.reset();
         mCreatingPath.moveTo(round(mLastMidX), round(mLastMidY));
@@ -134,10 +188,10 @@ public class Pen {
         RectUtil.pointsToRect(dirtyRect, (int) mLastMidX, (int) mLastMidY, (int) mPreviousX, (int) mPreviousY, (int) f1, (int) f2);
         RectUtil.expandBound(mPaint.getStrokeWidth(), dirtyRect);
 
-        mPreviousX = x;
-        mPreviousY = y;
+        mPreviousX = scaledX;
+        mPreviousY = scaledY;
 
-        savePoint(x, y);
+        savePoint(scaledX, scaledY);
     }
 
     public boolean updateSegmentPath(Rect dirtyRect, Path segmentPath, float x, float y) {

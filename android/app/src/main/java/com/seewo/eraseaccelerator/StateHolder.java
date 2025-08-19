@@ -71,6 +71,9 @@ public class StateHolder implements IFullScreenBitmapHolder {
      * open framebuffer
      */
     void onCreate(int widthPixels, int heightPixels) {
+        // Initialize the scaling factor for coordinate alignment
+        Pen.initializeScaleFactor(mContext);
+        
         mFullScreenBitmap = Bitmap.createBitmap(widthPixels, heightPixels, Bitmap.Config.ARGB_8888);
         mFullScreenCanvas = new Canvas(mFullScreenBitmap);
 
